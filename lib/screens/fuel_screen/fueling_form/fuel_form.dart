@@ -17,6 +17,7 @@ class _FuelFormState extends State<FuelForm> {
   DateTime? selectedDate;
   File? meterPhoto;
   File? receiptPhoto;
+  String? selectedDate2;
 
   final TextEditingController _vehicleNumberController =
       TextEditingController();
@@ -33,6 +34,7 @@ class _FuelFormState extends State<FuelForm> {
     if (picked != null) {
       setState(() {
         selectedDate = picked;
+        selectedDate2 = "${picked.day}-${picked.month}-${picked.year}";
       });
     }
   }
@@ -68,7 +70,7 @@ class _FuelFormState extends State<FuelForm> {
       return;
     } else {
       bool result = await Auth.addFuel(
-          selectedDate.toString(),
+          selectedDate2.toString(),
           _vehicleNumberController.text.trim(),
           _priceController.text.trim(),
           _fuelAmountController.text.trim());
@@ -79,7 +81,7 @@ class _FuelFormState extends State<FuelForm> {
         _fuelAmountController.clear();
         // Add a delay of 1 second before navigating
         Future.delayed(const Duration(milliseconds: 500), () {
-          Navigator.pop(context);
+          Navigator.pop(context, true);
         });
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('Fueling Form Submitted Successfully')),

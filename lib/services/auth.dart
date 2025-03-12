@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
 import 'package:savvy_aqua_delivery/constants/constant.dart';
+import 'package:savvy_aqua_delivery/model/fuel_model.dart';
 import 'package:savvy_aqua_delivery/model/user_model.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -96,5 +97,51 @@ class Auth {
       return false;
     }
     return false;
+  }
+
+  static Future<List<FuelModel>> fuelList() async {
+    try {
+      SharedPreferences prefs = await SharedPreferences.getInstance();
+      String? driverId = prefs.getString("userid");
+      if (kDebugMode) {
+        print("--------------------------driverid: $driverId");
+      }
+      final response = await http.post(
+        Uri.parse(Constant.viewFuel),
+        headers: <String, String>{'Content-Type': 'application/json'},
+        body: jsonEncode(<String, dynamic>{
+          "driver_id": driverId,
+        }),
+      );
+      if (kDebugMode) {
+        print("Constant.addFuel ${Constant.viewFuel}");
+        print("addFuel response:${response.body}");
+        // return true;
+      }
+
+      if (response.statusCode == 200 || response.statusCode == 201) {
+        final jsonresponse = jsonDecode(response.body);
+        if (kDebugMode) {
+          print("jsonresponse: $jsonresponse");
+        }
+
+        if (jsonresponse['status'] == "success") {
+          List<dynamic> responseList = jsonresponse["details"];
+          print(
+              "-------------------------responseList:${responseList.toString()}");
+
+          List<FuelModel> fuelList = responseList.map((data) {
+            return FuelModel.fromJson(data);
+          }).toList();
+          return fuelList;
+        }
+      }
+    } catch (e) {
+      if (kDebugMode) {
+        print("Login Error $e");
+      }
+      return [];
+    }
+    return [];
   }
 }

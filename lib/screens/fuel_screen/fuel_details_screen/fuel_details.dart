@@ -1,25 +1,52 @@
 import 'package:flutter/material.dart';
 
 class FuelDetails extends StatefulWidget {
-  const FuelDetails({super.key});
+  final String date;
+  final String vehicleNo;
+  final String price;
+  final String totalFuel;
+
+  const FuelDetails(
+      {super.key,
+      required this.date,
+      required this.vehicleNo,
+      required this.price,
+      required this.totalFuel});
 
   @override
   State<FuelDetails> createState() => _FuelDetailsState();
 }
 
 class _FuelDetailsState extends State<FuelDetails> {
-  final TextEditingController _dateController = TextEditingController();
-  final TextEditingController _vehicleNumberController =
-      TextEditingController();
-  final TextEditingController _fuelController = TextEditingController();
-  final TextEditingController _priceController = TextEditingController();
+  late TextEditingController _dateController;
+  late TextEditingController _vehicleNumberController;
+  late TextEditingController _fuelController;
+  late TextEditingController _priceController;
+
+  @override
+  void initState() {
+    super.initState();
+    _dateController = TextEditingController(text: widget.date);
+    _vehicleNumberController = TextEditingController(text: widget.vehicleNo);
+    _fuelController = TextEditingController(text: widget.totalFuel);
+    _priceController = TextEditingController(text: widget.price);
+  }
+
+  @override
+  void dispose() {
+    _dateController.dispose();
+    _vehicleNumberController.dispose();
+    _fuelController.dispose();
+    _priceController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
-        iconTheme: IconThemeData(color: Colors.white),
+        iconTheme: const IconThemeData(color: Colors.white),
         backgroundColor: Colors.blue,
         elevation: 0,
         title: const Text(
@@ -68,6 +95,7 @@ class _FuelDetailsState extends State<FuelDetails> {
 
   Widget _buildTextField(TextEditingController controller, String hint) {
     return TextField(
+      style: TextStyle(color: Colors.black),
       enabled: false,
       readOnly: true,
       controller: controller,
@@ -77,6 +105,11 @@ class _FuelDetailsState extends State<FuelDetails> {
           borderRadius: BorderRadius.circular(8),
           borderSide: const BorderSide(color: Colors.blue),
         ),
+        disabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(8),
+          borderSide: const BorderSide(color: Colors.blue),
+        ),
+
         contentPadding:
             const EdgeInsets.symmetric(horizontal: 12, vertical: 14),
       ),
