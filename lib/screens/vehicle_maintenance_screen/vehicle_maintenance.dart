@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:page_transition/page_transition.dart';
+import 'package:savvy_aqua_delivery/model/maintenance_model.dart';
 import 'package:savvy_aqua_delivery/screens/vehicle_maintenance_screen/maintenance_details_screen/maintenance_details.dart';
 import 'package:savvy_aqua_delivery/screens/vehicle_maintenance_screen/maintenance_form_screen/maintenance_form.dart';
+import 'package:savvy_aqua_delivery/services/auth.dart';
 
 class VehicleMaintenance extends StatefulWidget {
   @override
@@ -12,6 +14,10 @@ class VehicleMaintenance extends StatefulWidget {
 class _VehicleMaintenanceState extends State<VehicleMaintenance> {
   DateTime? fromDate;
   DateTime? toDate;
+  List<MaintenanceModel> allMaintenanceList = [];
+  List<MaintenanceModel> filteredMaintenanceList =
+      []; // Stores filtered data based on date range
+  bool isLoading = true;
 
   Future<void> _selectDate(BuildContext context, bool isFromDate) async {
     DateTime? picked = await showDatePicker(
@@ -32,13 +38,40 @@ class _VehicleMaintenanceState extends State<VehicleMaintenance> {
   }
 
   @override
+  void initState() {
+    super.initState();
+    _fetchMaintenanceList();
+  }
+
+  Future<void> _fetchMaintenanceList() async {
+    setState(() {
+      isLoading = true;
+    });
+
+    try {
+      List<MaintenanceModel> list = await Auth.maintenanceList();
+      setState(() {
+        allMaintenanceList = list;
+        filteredMaintenanceList = list;
+        isLoading = false;
+      });
+    } catch (e) {
+      print("Error fetching maintenance list: $e");
+      setState(() {
+        isLoading = false;
+      });
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
         backgroundColor: Colors.blue,
 
-        title: Text("Maintenance List", style: TextStyle(color: Colors.white)),
+        title: const Text("Maintenance List",
+            style: TextStyle(color: Colors.white)),
         // actions: [
         //   Padding(
         //     padding: EdgeInsets.symmetric(horizontal: 8.0),
@@ -59,19 +92,23 @@ class _VehicleMaintenanceState extends State<VehicleMaintenance> {
       floatingActionButton: FloatingActionButton(
         tooltip: "ADD",
         backgroundColor: Colors.blue,
-        onPressed: () {
-          Navigator.push(
+        onPressed: () async {
+          bool? result = await Navigator.push(
               context,
               PageTransition(
                   type: PageTransitionType.rightToLeft,
                   duration: const Duration(milliseconds: 200),
                   reverseDuration: const Duration(milliseconds: 200),
-                  child: MaintenanceForm()));
+                  child: const MaintenanceForm()));
+
+          if (result == true) {
+            _fetchMaintenanceList();
+          }
         },
         child: const Icon(Icons.add, color: Colors.white),
       ),
       body: Padding(
-        padding: EdgeInsets.all(12.0),
+        padding: const EdgeInsets.all(12.0),
         child: Column(
           children: [
             Row(
@@ -79,11 +116,11 @@ class _VehicleMaintenanceState extends State<VehicleMaintenance> {
                 Expanded(
                   child: _buildDateField(context, "From Date", fromDate, true),
                 ),
-                SizedBox(width: 10),
+                const SizedBox(width: 10),
                 Expanded(
                   child: _buildDateField(context, "To Date", toDate, false),
                 ),
-                SizedBox(width: 10),
+                const SizedBox(width: 10),
                 ElevatedButton(
                   onPressed: () {},
                   style: ElevatedButton.styleFrom(
@@ -91,29 +128,60 @@ class _VehicleMaintenanceState extends State<VehicleMaintenance> {
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(8),
                     ),
-                    padding: EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 16, vertical: 12),
                   ),
-                  child: Text("Search", style: TextStyle(color: Colors.white)),
+                  child: const Text("Search",
+                      style: TextStyle(color: Colors.white)),
                 ),
               ],
             ),
-            SizedBox(height: 12),
+            const SizedBox(height: 12),
             Expanded(
-              child: ListView.builder(
-                itemCount: 2, // Example count
-                itemBuilder: (context, index) {
-                  return GestureDetector(
-                      onTap: () {
-                        Navigator.push(
-                            context,
-                            PageTransition(
-                                type: PageTransitionType.rightToLeft,
-                                duration: Duration(milliseconds: 200),
-                                child: MaintenanceDetails()));
-                      },
-                      child: MaintenanceCard());
-                },
-              ),
+              child: isLoading
+                  ? const Center(
+                      child: CircularProgressIndicator(
+                      color: Colors.blue,
+                    )) // <-- Show loading spinner
+                  : filteredMaintenanceList.isEmpty
+                      ? const Center(child: Text("No Data Available"))
+                      : ListView.builder(
+                          itemCount:
+                              filteredMaintenanceList.length, // Example count
+                          itemBuilder: (context, index) {
+                            final data = filteredMaintenanceList[index];
+
+                            return GestureDetector(
+                                onTap: () async {
+                                  bool? result = await Navigator.push(
+                                      context,
+                                      PageTransition(
+                                          type: PageTransitionType.rightToLeft,
+                                          duration:
+                                              const Duration(milliseconds: 200),
+                                          child: MaintenanceDetails(
+                                            vehicleNo: data.vehicleNo,
+                                            maintenanceType:
+                                                data.maintenanceType,
+                                            maintenanceDescription:
+                                                data.maintenanceDescription,
+                                            totalAmount: data.totalAmount,
+                                            createdAt: data.createdAt,
+                                          )));
+
+                                  if (result == true) {
+                                    setState(() {});
+                                  }
+                                },
+                                child: MaintenanceCard(
+                                  vehicleNo: data.vehicleNo,
+                                  maintenanceType: data.maintenanceType,
+                                  maintenanceDescription:
+                                      data.maintenanceDescription,
+                                  totalAmount: data.totalAmount,
+                                ));
+                          },
+                        ),
             ),
           ],
         ),
@@ -126,7 +194,7 @@ class _VehicleMaintenanceState extends State<VehicleMaintenance> {
     return GestureDetector(
       onTap: () => _selectDate(context, isFromDate),
       child: Container(
-        padding: EdgeInsets.symmetric(horizontal: 10, vertical: 12),
+        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 12),
         decoration: BoxDecoration(
           border: Border.all(color: Colors.grey),
           borderRadius: BorderRadius.circular(8),
@@ -137,10 +205,10 @@ class _VehicleMaintenanceState extends State<VehicleMaintenance> {
             Expanded(
               child: Text(
                 date != null ? DateFormat('dd-MM-yyyy').format(date) : label,
-                style: TextStyle(fontSize: 16, color: Colors.black54),
+                style: const TextStyle(fontSize: 16, color: Colors.black54),
               ),
             ),
-            Icon(Icons.calendar_today, size: 18, color: Colors.grey),
+            const Icon(Icons.calendar_today, size: 18, color: Colors.grey),
           ],
         ),
       ),
@@ -148,35 +216,52 @@ class _VehicleMaintenanceState extends State<VehicleMaintenance> {
   }
 }
 
-class MaintenanceCard extends StatelessWidget {
+class MaintenanceCard extends StatefulWidget {
+  final String vehicleNo;
+  final String maintenanceType;
+  final String maintenanceDescription;
+  final String totalAmount;
+
+  const MaintenanceCard(
+      {super.key,
+      required this.vehicleNo,
+      required this.maintenanceType,
+      required this.maintenanceDescription,
+      required this.totalAmount});
+
+  @override
+  State<MaintenanceCard> createState() => _MaintenanceCardState();
+}
+
+class _MaintenanceCardState extends State<MaintenanceCard> {
   @override
   Widget build(BuildContext context) {
     return Card(
       color: Colors.white,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       elevation: 2,
-      margin: EdgeInsets.symmetric(vertical: 8),
+      margin: const EdgeInsets.symmetric(vertical: 8),
       child: Padding(
-        padding: EdgeInsets.all(12.0),
+        padding: const EdgeInsets.all(12.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            _buildTextRow("Vehicle Number", "MH 12 6977"),
-            _buildTextRow("Maintenance Type", "Break Failed"),
-            _buildTextRow("Description", "Break Failed"),
-            SizedBox(height: 8),
-            Text("Bill",
+            _buildTextRow("Vehicle Number", widget.vehicleNo),
+            _buildTextRow("Maintenance Type", widget.maintenanceType),
+            _buildTextRow("Description", widget.maintenanceDescription),
+            const SizedBox(height: 8),
+            const Text("Bill",
                 style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
-            SizedBox(height: 6),
+            const SizedBox(height: 6),
             Row(
               children: [
                 Container(
-                  padding: EdgeInsets.all(12),
+                  padding: const EdgeInsets.all(12),
                   decoration: BoxDecoration(
                     border: Border.all(color: Colors.blue),
                     borderRadius: BorderRadius.circular(8),
                   ),
-                  child: Column(
+                  child: const Column(
                     children: [
                       Icon(Icons.insert_drive_file,
                           color: Colors.blue, size: 30),
@@ -185,11 +270,12 @@ class MaintenanceCard extends StatelessWidget {
                     ],
                   ),
                 ),
-                Spacer(),
+                const Spacer(),
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    _buildTextRow("Total", "2000", valueColor: Colors.blue),
+                    _buildTextRow("Total", widget.totalAmount,
+                        valueColor: Colors.blue),
                     _buildTextRow("Status", "Approved",
                         valueColor: Colors.green),
                   ],
@@ -204,11 +290,11 @@ class MaintenanceCard extends StatelessWidget {
 
   Widget _buildTextRow(String title, String value, {Color? valueColor}) {
     return Padding(
-      padding: EdgeInsets.symmetric(vertical: 4),
+      padding: const EdgeInsets.symmetric(vertical: 4),
       child: RichText(
         text: TextSpan(
           text: "$title - ",
-          style: TextStyle(
+          style: const TextStyle(
               fontWeight: FontWeight.bold, fontSize: 16, color: Colors.black),
           children: [
             TextSpan(

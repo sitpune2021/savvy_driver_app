@@ -1,7 +1,18 @@
 import 'package:flutter/material.dart';
 
 class MaintenanceDetails extends StatefulWidget {
-  const MaintenanceDetails({super.key});
+  final String vehicleNo;
+  final String maintenanceType;
+  final String maintenanceDescription;
+  final String totalAmount;
+  final String createdAt;
+  const MaintenanceDetails(
+      {super.key,
+      required this.vehicleNo,
+      required this.maintenanceType,
+      required this.maintenanceDescription,
+      required this.totalAmount,
+      required this.createdAt});
 
   @override
   State<MaintenanceDetails> createState() => _MaintenanceDetailsState();
@@ -40,21 +51,21 @@ class _MaintenanceDetailsState extends State<MaintenanceDetails> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                _buildDetailText("Vehicle Number", "MH 12 6977"),
-                _buildDetailText("Maintenance Type", "Break Failed"),
-                _buildDetailText("Date", "25-02-2025"),
+                _buildDetailText("Vehicle Number", widget.vehicleNo),
+                _buildDetailText("Maintenance Type", widget.maintenanceType),
+                _buildDetailText("Date", widget.createdAt),
                 const SizedBox(height: 10),
                 const Text(
                   "Description",
                   style: TextStyle(fontWeight: FontWeight.bold),
                 ),
                 const SizedBox(height: 4),
-                const Text(
-                  "Damage can occur due to brake failure from worn pads or low fluid, engine overheating, transmission issues, or electrical faults like a dead battery. Suspension problems, tire wear, and external factors like accidents or water damage also impact performance. Regular maintenance prevents major issues.",
+                Text(
+                  widget.maintenanceDescription,
                   style: TextStyle(color: Colors.black87),
                 ),
                 const Divider(height: 30),
-                _buildTotalAmount(),
+                _buildTotalAmount(widget.totalAmount),
                 const SizedBox(height: 10),
                 _buildBillSection(),
                 const SizedBox(height: 20),
@@ -85,7 +96,7 @@ class _MaintenanceDetailsState extends State<MaintenanceDetails> {
     );
   }
 
-  Widget _buildTotalAmount() {
+  Widget _buildTotalAmount(String amount) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
@@ -99,8 +110,8 @@ class _MaintenanceDetailsState extends State<MaintenanceDetails> {
             color: Colors.blue,
             borderRadius: BorderRadius.circular(6),
           ),
-          child: const Text(
-            "1000",
+          child: Text(
+            amount,
             style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
           ),
         ),

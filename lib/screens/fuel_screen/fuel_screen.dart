@@ -19,6 +19,7 @@ class _FuelScreenState extends State<FuelScreen> {
   List<FuelModel> allFuelData = []; // Stores all data fetched from Firebase
   List<FuelModel> filteredFuelData =
       []; // Stores filtered data based on date range
+  bool isLoading = true;
 
   @override
   void initState() {
@@ -27,14 +28,21 @@ class _FuelScreenState extends State<FuelScreen> {
   }
 
   Future<void> _fetchFuelData() async {
+    setState(() {
+      isLoading = true;
+    });
     try {
       List<FuelModel> data = await Auth.fuelList();
       setState(() {
         allFuelData = data;
         filteredFuelData = data; // Initially show all data
+        isLoading = false;
       });
     } catch (e) {
       print("Error fetching data: $e");
+      setState(() {
+        isLoading = true;
+      });
     }
   }
 
@@ -117,61 +125,66 @@ class _FuelScreenState extends State<FuelScreen> {
   }
 
   Widget _buildFuelList() {
-    return filteredFuelData.isEmpty
-        ? const Center(child: Text("No Data Available"))
-        : ListView.builder(
-            itemCount: filteredFuelData.length,
-            itemBuilder: (context, index) {
-              final item = filteredFuelData[index];
-              return GestureDetector(
-                onTap: () {
-                  Navigator.push(
-                    context,
-                    PageTransition(
-                      type: PageTransitionType.rightToLeft,
-                      child: FuelDetails(
-                        date: item.date,
-                        vehicleNo: item.vehicleNo,
-                        totalFuel: item.totalFuel,
-                        price: item.price,
+    return isLoading
+        ? const Center(
+            child: CircularProgressIndicator(
+            color: Colors.blue,
+          ))
+        : filteredFuelData.isEmpty
+            ? const Center(child: Text("No Data Available"))
+            : ListView.builder(
+                itemCount: filteredFuelData.length,
+                itemBuilder: (context, index) {
+                  final item = filteredFuelData[index];
+                  return GestureDetector(
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        PageTransition(
+                          type: PageTransitionType.rightToLeft,
+                          child: FuelDetails(
+                            date: item.date,
+                            vehicleNo: item.vehicleNo,
+                            totalFuel: item.totalFuel,
+                            price: item.price,
+                          ),
+                        ),
+                      );
+                    },
+                    child: Container(
+                      margin: const EdgeInsets.symmetric(vertical: 5),
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 12, vertical: 14),
+                      decoration: BoxDecoration(
+                        border: Border.all(color: Colors.blue),
+                        borderRadius: BorderRadius.circular(8),
+                        color: Colors.white,
+                      ),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Text(item.vehicleNo,
+                              style: const TextStyle(
+                                  fontSize: 16, fontWeight: FontWeight.w500)),
+                          Row(
+                            children: [
+                              const Icon(Icons.local_gas_station,
+                                  color: Colors.blue),
+                              const SizedBox(width: 5),
+                              Text(item.totalFuel,
+                                  style: const TextStyle(
+                                      color: Colors.blue,
+                                      fontWeight: FontWeight.w500)),
+                              const Icon(Icons.arrow_forward_ios,
+                                  size: 16, color: Colors.blue),
+                            ],
+                          ),
+                        ],
                       ),
                     ),
                   );
                 },
-                child: Container(
-                  margin: const EdgeInsets.symmetric(vertical: 5),
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 12, vertical: 14),
-                  decoration: BoxDecoration(
-                    border: Border.all(color: Colors.blue),
-                    borderRadius: BorderRadius.circular(8),
-                    color: Colors.white,
-                  ),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Text(item.vehicleNo,
-                          style: const TextStyle(
-                              fontSize: 16, fontWeight: FontWeight.w500)),
-                      Row(
-                        children: [
-                          const Icon(Icons.local_gas_station,
-                              color: Colors.blue),
-                          const SizedBox(width: 5),
-                          Text(item.totalFuel,
-                              style: const TextStyle(
-                                  color: Colors.blue,
-                                  fontWeight: FontWeight.w500)),
-                          const Icon(Icons.arrow_forward_ios,
-                              size: 16, color: Colors.blue),
-                        ],
-                      ),
-                    ],
-                  ),
-                ),
               );
-            },
-          );
   }
 
   Widget _buildDateField(String label, DateTime? date, bool isFromDate) {

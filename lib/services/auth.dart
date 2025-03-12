@@ -4,6 +4,7 @@ import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
 import 'package:savvy_aqua_delivery/constants/constant.dart';
 import 'package:savvy_aqua_delivery/model/fuel_model.dart';
+import 'package:savvy_aqua_delivery/model/maintenance_model.dart';
 import 'package:savvy_aqua_delivery/model/user_model.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -134,6 +135,102 @@ class Auth {
             return FuelModel.fromJson(data);
           }).toList();
           return fuelList;
+        }
+      }
+    } catch (e) {
+      if (kDebugMode) {
+        print("Login Error $e");
+      }
+      return [];
+    }
+    return [];
+  }
+
+  static Future<bool> addMaintenance(
+      // String date,
+      String vehicleNo,
+      String maintenanceType,
+      String maintenanceDesciption,
+      String price) async {
+    try {
+      SharedPreferences prefs = await SharedPreferences.getInstance();
+      String? driverId = prefs.getString("userid");
+      if (kDebugMode) {
+        print("--------------------------driverid: $driverId");
+      }
+      final response = await http.post(
+        Uri.parse(Constant.storeMaintenance),
+        headers: <String, String>{'Content-Type': 'application/json'},
+        body: jsonEncode(<String, dynamic>{
+          // need to send date also
+          "driver_id": driverId,
+
+          "vehical_no": vehicleNo,
+          "maintenance_type": maintenanceType,
+          "maintenance_desciption": maintenanceDesciption,
+          "total_amount": price
+        }),
+      );
+      if (kDebugMode) {
+        print("Constant.addFuel ${Constant.storeMaintenance}");
+        print("addMaintenance response:${response.body}");
+        // return true;
+      }
+
+      if (response.statusCode == 200 || response.statusCode == 201) {
+        final jsonresponse = jsonDecode(response.body);
+        if (kDebugMode) {
+          print("jsonresponse: $jsonresponse");
+        }
+
+        if (jsonresponse['status'] == "success") {
+          return true;
+        }
+      }
+    } catch (e) {
+      if (kDebugMode) {
+        print("Login Error $e");
+      }
+      return false;
+    }
+    return false;
+  }
+
+  static Future<List<MaintenanceModel>> maintenanceList() async {
+    try {
+      SharedPreferences prefs = await SharedPreferences.getInstance();
+      String? driverId = prefs.getString("userid");
+      if (kDebugMode) {
+        print("--------------------------driverid: $driverId");
+      }
+      final response = await http.post(
+        Uri.parse(Constant.viewMaintenance),
+        headers: <String, String>{'Content-Type': 'application/json'},
+        body: jsonEncode(<String, dynamic>{
+          "driver_id": driverId,
+        }),
+      );
+      if (kDebugMode) {
+        print("Constant.addFuel ${Constant.viewMaintenance}");
+        print("addFuel response:${response.body}");
+        // return true;
+      }
+
+      if (response.statusCode == 200 || response.statusCode == 201) {
+        final jsonresponse = jsonDecode(response.body);
+        if (kDebugMode) {
+          print("jsonresponse: $jsonresponse");
+        }
+
+        if (jsonresponse['status'] == "success") {
+          List<dynamic> responseList = jsonresponse["details"];
+          print(
+              "-------------------------responseList:${responseList.toString()}");
+
+          List<MaintenanceModel> maintenanceList = responseList.map((data) {
+            return MaintenanceModel.fromJson(data);
+          }).toList();
+          return maintenanceList;
         }
       }
     } catch (e) {

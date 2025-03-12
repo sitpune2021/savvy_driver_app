@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'dart:io';
 
+import 'package:savvy_aqua_delivery/services/auth.dart';
+
 class MaintenanceForm extends StatefulWidget {
   const MaintenanceForm({super.key});
 
@@ -29,11 +31,11 @@ class _MaintenanceFormState extends State<MaintenanceForm> {
     }
   }
 
-  void _submitForm() {
-    String vehicleNumber = _vehicleNumberController.text;
-    String maintenanceType = _maintenanceTypeController.text;
-    String description = _descriptionController.text;
-    String totalAmount = _totalAmountController.text;
+  void _submitForm() async {
+    String vehicleNumber = _vehicleNumberController.text.trim();
+    String maintenanceType = _maintenanceTypeController.text.trim();
+    String description = _descriptionController.text.trim();
+    String totalAmount = _totalAmountController.text.trim();
 
     if (vehicleNumber.isEmpty ||
         maintenanceType.isEmpty ||
@@ -43,12 +45,31 @@ class _MaintenanceFormState extends State<MaintenanceForm> {
         const SnackBar(content: Text('Please fill all fields')),
       );
       return;
+    } else {
+      bool result = await Auth.addMaintenance(
+          vehicleNumber, maintenanceType, description, totalAmount);
+
+      if (result) {
+        _vehicleNumberController.clear();
+        _maintenanceTypeController.clear();
+        _descriptionController.clear();
+        _totalAmountController.clear();
+        // Add a delay of 1 second before navigating
+        Future.delayed(const Duration(milliseconds: 500), () {
+          Navigator.pop(context, true);
+        });
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+              content: Text('Maintenance Form Submitted Successfully')),
+        );
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Server Error please try again later!')),
+        );
+      }
     }
 
     // Handle form submission logic here
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Form Submitted Successfully')),
-    );
   }
 
   @override
@@ -115,7 +136,7 @@ class _MaintenanceFormState extends State<MaintenanceForm> {
                 onPressed: _submitForm,
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Colors.blue,
-                  shape: RoundedRectangleBorder(
+                  shape: const RoundedRectangleBorder(
                       borderRadius: BorderRadius.all(Radius.circular(8))),
                   minimumSize: const Size(double.infinity, 50),
                 ),
