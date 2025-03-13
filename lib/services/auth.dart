@@ -5,6 +5,7 @@ import 'package:http/http.dart' as http;
 import 'package:savvy_aqua_delivery/constants/constant.dart';
 import 'package:savvy_aqua_delivery/model/fuel_model.dart';
 import 'package:savvy_aqua_delivery/model/maintenance_model.dart';
+import 'package:savvy_aqua_delivery/model/order_model.dart';
 import 'package:savvy_aqua_delivery/model/user_model.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -240,5 +241,99 @@ class Auth {
       return [];
     }
     return [];
+  }
+
+  static Future<List<OrderModel>> orderList() async {
+    try {
+      SharedPreferences prefs = await SharedPreferences.getInstance();
+      String? driverId = prefs.getString("userid");
+      if (kDebugMode) {
+        print("--------------------------driverid: $driverId");
+      }
+      final response = await http.post(
+        Uri.parse(Constant.veiwAllOrder),
+        headers: <String, String>{'Content-Type': 'application/json'},
+        body: jsonEncode(<String, dynamic>{
+          "driver_id": driverId,
+          // "driver_id": "1",
+        }),
+      );
+      if (kDebugMode) {
+        print("Constant.addFuel ${Constant.veiwAllOrder}");
+        print("addFuel response:${response.body}");
+        // return true;
+      }
+
+      if (response.statusCode == 200 || response.statusCode == 201) {
+        final jsonresponse = jsonDecode(response.body);
+        if (kDebugMode) {
+          print("jsonresponse: $jsonresponse");
+        }
+
+        if (jsonresponse['status'] == "success") {
+          List<dynamic> responseList = jsonresponse["details"];
+          print(
+              "-------------------------responseList:${responseList.toString()}");
+
+          List<OrderModel> orderList = responseList.map((data) {
+            return OrderModel.fromJson(data);
+          }).toList();
+          return orderList;
+        }
+      }
+    } catch (e) {
+      if (kDebugMode) {
+        print("Login Error $e");
+      }
+      return [];
+    }
+    return [];
+  }
+
+  static Future<bool> orderConfirmation(
+    // String date,
+    String orderId,
+    String deliverQty,
+    String returnQty,
+  ) async {
+    try {
+      SharedPreferences prefs = await SharedPreferences.getInstance();
+      String? driverId = prefs.getString("userid");
+      if (kDebugMode) {
+        print("--------------------------driverid: $driverId");
+      }
+      final response = await http.post(
+        Uri.parse(Constant.confirmOrder),
+        headers: <String, String>{'Content-Type': 'application/json'},
+        body: jsonEncode(<String, dynamic>{
+          "driver_id": driverId,
+          "order_id": orderId,
+          "delever_qty": deliverQty,
+          "return_qty": returnQty
+        }),
+      );
+      if (kDebugMode) {
+        print("Constant.confirmOrder ${Constant.confirmOrder}");
+        print("Confirm Order response:${response.body}");
+        // return true;
+      }
+
+      if (response.statusCode == 200 || response.statusCode == 201) {
+        final jsonresponse = jsonDecode(response.body);
+        if (kDebugMode) {
+          print("jsonresponse: $jsonresponse");
+        }
+
+        if (jsonresponse['status'] == "success") {
+          return true;
+        }
+      }
+    } catch (e) {
+      if (kDebugMode) {
+        print("Confirm Order Error $e");
+      }
+      return false;
+    }
+    return false;
   }
 }

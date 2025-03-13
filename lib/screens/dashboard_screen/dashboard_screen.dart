@@ -30,15 +30,27 @@ class _DashboardScreenState extends State<DashboardScreen> {
         ProfileScreen()
       ];
 
-  void _onDestinationSelected(int index) {
+  void _onDestinationSelected(int index) async {
     setState(() {
       _currentIndex = index;
     });
   }
 
+  void _navigation() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    String? returnIndex = prefs.getString("navTwo");
+    setState(() {
+      if (returnIndex == "true") {
+        _currentIndex = 1;
+      }
+    });
+    await prefs.remove("navTwo");
+  }
+
   @override
   void initState() {
     super.initState();
+    _navigation();
     _loadUserData();
     _checkConnectivity(); // Check initial connectivity status
     _connectivity.onConnectivityChanged.listen((ConnectivityResult result) {

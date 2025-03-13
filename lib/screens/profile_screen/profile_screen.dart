@@ -4,6 +4,7 @@ import 'package:flutter_vector_icons/flutter_vector_icons.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:page_transition/page_transition.dart';
 import 'package:savvy_aqua_delivery/constants/color_constants.dart';
+import 'package:savvy_aqua_delivery/screens/digital_card/digital_card.dart';
 import 'package:savvy_aqua_delivery/screens/fuel_screen/fuel_screen.dart';
 import 'package:savvy_aqua_delivery/screens/login_screen/login_screen.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -132,6 +133,22 @@ class _ProfileScreenState extends State<ProfileScreen> {
                               milliseconds: 200), // Adjust as needed
                           reverseDuration: const Duration(milliseconds: 200),
                           child: const FuelScreen(),
+                        ),
+                      );
+                    },
+                  ),
+                  GestureDetector(
+                    child: _buildMenuItem(Icons.book, "Digital Card"),
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        PageTransition(
+                          type: PageTransitionType
+                              .rightToLeft, // Choose appropriate transition
+                          duration: const Duration(
+                              milliseconds: 200), // Adjust as needed
+                          reverseDuration: const Duration(milliseconds: 200),
+                          child: DigitalCard(),
                         ),
                       );
                     },

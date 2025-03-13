@@ -6,4 +6,6 @@ class Constant {
   static const viewFuel = "${baseurl}APP_FuleView";
   static const storeMaintenance = "${baseurl}APP_MaintenanceAdd";
   static const viewMaintenance = "${baseurl}APP_MaintenanceView";
+  static const veiwAllOrder = "${baseurl}APP_OrdersViewAll";
+  static const confirmOrder = "${baseurl}APP_OrdersQtyUpdate";
 }

@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:page_transition/page_transition.dart';
+import 'package:savvy_aqua_delivery/screens/order_screen/ongoing_orders/ongoing_orders.dart';
+import 'package:savvy_aqua_delivery/screens/order_screen/order_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -28,7 +31,7 @@ class _HomeScreenState extends State<HomeScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(
+              const Text(
                 "Today's Order Statistics",
                 style: TextStyle(
                     fontSize: 20,
@@ -111,7 +114,19 @@ class _HomeScreenState extends State<HomeScreen> {
                   style: const TextStyle(
                       fontSize: 16, fontWeight: FontWeight.bold)),
               TextButton(
-                  onPressed: () {},
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      PageTransition(
+                        type: PageTransitionType
+                            .rightToLeft, // Choose appropriate transition
+                        duration: const Duration(
+                            milliseconds: 200), // Adjust as needed
+                        reverseDuration: const Duration(milliseconds: 200),
+                        child: OrderScreen(),
+                      ),
+                    );
+                  },
                   child: const Text("See All",
                       style: TextStyle(color: Colors.blue))),
             ],
@@ -119,18 +134,64 @@ class _HomeScreenState extends State<HomeScreen> {
         ),
         Card(
           color: Colors.white,
+          margin: const EdgeInsets.symmetric(vertical: 8, horizontal: 5),
           shape:
               RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-          child: ListTile(
-            title: const Text("#ORD97",
-                style: TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.blue)),
-            subtitle: Text(itemCount,
-                style: const TextStyle(fontSize: 14, color: Colors.black54)),
-            trailing: const Icon(Icons.arrow_forward_ios, color: Colors.blue),
-            onTap: () {},
+          elevation: 4,
+          child: const Padding(
+            padding: EdgeInsets.all(12),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text("#ORD97",
+                    style: TextStyle(
+                        color: Colors.blue, fontWeight: FontWeight.bold)),
+                SizedBox(height: 5),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text("John Washington",
+                        style: TextStyle(
+                            fontSize: 16, fontWeight: FontWeight.bold)),
+                    Text("12-03-2025", style: TextStyle(color: Colors.grey)),
+                  ],
+                ),
+                SizedBox(height: 5),
+                Row(
+                  children: [
+                    Icon(Icons.location_on, color: Colors.blue, size: 18),
+                    SizedBox(width: 5),
+                    Expanded(
+                      child: Text("Wakad,Pune",
+                          style: TextStyle(color: Colors.black54)),
+                    ),
+                  ],
+                ),
+                Divider(),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text("Quantity", style: TextStyle(color: Colors.black54)),
+                    Text("10", style: TextStyle(fontWeight: FontWeight.bold)),
+                  ],
+                ),
+                Divider(),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text("Delivery Status",
+                        style: TextStyle(color: Colors.black54)),
+                    Row(
+                      children: [
+                        Icon(Icons.circle, color: Colors.orange, size: 12),
+                        SizedBox(width: 5),
+                        Text("Pending", style: TextStyle(color: Colors.black)),
+                      ],
+                    ),
+                  ],
+                ),
+              ],
+            ),
           ),
         ),
       ],

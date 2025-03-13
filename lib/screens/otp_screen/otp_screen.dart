@@ -71,7 +71,7 @@ class _OtpScreenState extends State<OtpScreen> {
                         Align(
                           alignment: Alignment.center,
                           child: Image.asset(
-                            "assets/images/image.png", // Ensure this image exists
+                            "assets/images/SavyLogo.png", // Ensure this image exists
                             height: 250,
                           ),
                         ),

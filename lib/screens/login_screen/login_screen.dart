@@ -64,7 +64,8 @@ class _LoginScreenState extends State<LoginScreen> {
                   ),
                   Align(
                     alignment: Alignment.center,
-                    child: Image.asset("assets/images/image.png", height: 250),
+                    child:
+                        Image.asset("assets/images/SavyLogo.png", height: 250),
                   ),
                   const SizedBox(height: 20),
 

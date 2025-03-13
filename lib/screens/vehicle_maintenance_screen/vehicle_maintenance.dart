@@ -63,6 +63,27 @@ class _VehicleMaintenanceState extends State<VehicleMaintenance> {
     }
   }
 
+  void _filterData() {
+    if (fromDate == null || toDate == null) {
+      return;
+    } else if (fromDate!.isAfter(toDate!)) {
+      ScaffoldMessenger.of(context)
+          .showSnackBar(SnackBar(content: Text("Enter correct dates!")));
+    } else {
+      setState(() {
+        filteredMaintenanceList = allMaintenanceList.where((maintenance) {
+          // Convert string date to DateTime
+          DateTime maintenanceDate =
+              DateFormat("yyyy-MM-dd").parse(maintenance.createdAt);
+
+          return maintenanceDate
+                  .isAfter(fromDate!.subtract(const Duration(days: 1))) &&
+              maintenanceDate.isBefore(toDate!.add(const Duration(days: 1)));
+        }).toList();
+      });
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -122,7 +143,9 @@ class _VehicleMaintenanceState extends State<VehicleMaintenance> {
                 ),
                 const SizedBox(width: 10),
                 ElevatedButton(
-                  onPressed: () {},
+                  onPressed: () {
+                    _filterData();
+                  },
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Colors.blue,
                     shape: RoundedRectangleBorder(

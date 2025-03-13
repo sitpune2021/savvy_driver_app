@@ -27,6 +27,7 @@ class _OrderScreenState extends State<OrderScreen>
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
+        iconTheme: IconThemeData(color: Colors.white),
         title: const Text("Orders", style: TextStyle(color: Colors.white)),
         backgroundColor: Colors.blue,
         bottom: TabBar(
