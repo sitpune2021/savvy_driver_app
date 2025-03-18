@@ -7,6 +7,7 @@ import 'package:savvy_aqua_delivery/constants/color_constants.dart';
 import 'package:savvy_aqua_delivery/screens/digital_card/digital_card.dart';
 import 'package:savvy_aqua_delivery/screens/fuel_screen/fuel_screen.dart';
 import 'package:savvy_aqua_delivery/screens/login_screen/login_screen.dart';
+import 'package:savvy_aqua_delivery/services/auth.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class ProfileScreen extends StatefulWidget {
@@ -120,7 +121,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
               padding: const EdgeInsets.only(left: 10.0, right: 10.0),
               child: Column(
                 children: [
-                  _buildMenuItem(FontAwesome.edit, "Update Profile"),
+                  // _buildMenuItem(FontAwesome.edit, "Update Profile"),
                   GestureDetector(
                     child: _buildMenuItem(Icons.local_gas_station, "Fuel"),
                     onTap: () {
@@ -346,9 +347,34 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         borderRadius: BorderRadius.circular(8),
                       ),
                     ),
-                    onPressed: () {
+                    onPressed: () async {
                       // Handle Delete Action
-                      Navigator.pop(context);
+
+                      bool result = await Auth.deleteAccount();
+                      if (result) {
+                        Navigator.pop(context);
+                        SharedPreferences prefs =
+                            await SharedPreferences.getInstance();
+                        prefs.clear();
+                        ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(
+                                content: Text(
+                                    "Your account deleted successfully!")));
+                        Navigator.pushReplacement(
+                            context,
+                            PageTransition(
+                                type: PageTransitionType.rightToLeft,
+                                duration: const Duration(milliseconds: 200),
+                                reverseDuration:
+                                    const Duration(milliseconds: 200),
+                                child: const LoginScreen()));
+                      } else {
+                        Navigator.pop(context);
+                        ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(
+                                content: Text(
+                                    "Account not deleted, please try again!")));
+                      }
                     },
                     child: const Text(
                       "Delete Account",
@@ -430,9 +456,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
                           context,
                           PageTransition(
                               type: PageTransitionType.rightToLeft,
-                              duration: Duration(milliseconds: 200),
-                              reverseDuration: Duration(milliseconds: 200),
-                              child: LoginScreen()));
+                              duration: const Duration(milliseconds: 200),
+                              reverseDuration:
+                                  const Duration(milliseconds: 200),
+                              child: const LoginScreen()));
                     },
                     child: const Text(
                       "Log Out",

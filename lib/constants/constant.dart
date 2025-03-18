@@ -11,4 +11,5 @@ class Constant {
   static const digitalCard = "${baseurl}APP_DriverDigitalCard";
   static const orderDetails = "${baseurl}APP_OrdersDetailsViewAll";
   static const orderStatistics = "${baseurl}APP_DashboardAPI";
+  static const deleteAccount = "${baseurl}deleteProfile";
 }

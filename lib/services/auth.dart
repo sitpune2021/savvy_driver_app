@@ -575,4 +575,41 @@ class Auth {
     }
     return [];
   }
+
+  static Future<bool> deleteAccount() async {
+    try {
+      SharedPreferences prefs = await SharedPreferences.getInstance();
+      String? driverId = prefs.getString("userid");
+      if (kDebugMode) {
+        print("--------------------------driverid: $driverId");
+      }
+      final response = await http.post(
+        Uri.parse(Constant.deleteAccount),
+        headers: <String, String>{'Content-Type': 'application/json'},
+        body: jsonEncode(<String, dynamic>{"driver_id": driverId}),
+      );
+      if (kDebugMode) {
+        print("Constant.deleteAccount ${Constant.deleteAccount}");
+        print("deleteAccount response:${response.body}");
+        // return true;
+      }
+
+      if (response.statusCode == 200 || response.statusCode == 201) {
+        final jsonresponse = jsonDecode(response.body);
+        if (kDebugMode) {
+          print("jsonresponse: $jsonresponse");
+        }
+
+        if (jsonresponse['status'] == "success") {
+          return true;
+        }
+      }
+    } catch (e) {
+      if (kDebugMode) {
+        print("Delete Account Error $e");
+      }
+      return false;
+    }
+    return false;
+  }
 }
