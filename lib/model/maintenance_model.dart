@@ -7,6 +7,7 @@ class MaintenanceModel {
   final String totalAmount;
   final String isDeleted;
   final String createdAt;
+  final String filepath;
 
   MaintenanceModel({
     required this.id,
@@ -17,6 +18,7 @@ class MaintenanceModel {
     required this.totalAmount,
     required this.isDeleted,
     required this.createdAt,
+    required this.filepath,
   });
 
   factory MaintenanceModel.fromJson(Map<String, dynamic> json) {
@@ -29,6 +31,7 @@ class MaintenanceModel {
       totalAmount: json['total_amount'],
       isDeleted: json['isdeleted'],
       createdAt: json['created_at'],
+      filepath: json['filepath'],
     );
   }
 
@@ -42,6 +45,7 @@ class MaintenanceModel {
       'total_amount': totalAmount,
       'isdeleted': isDeleted,
       'created_at': createdAt,
+      'filepath': filepath
     };
   }
 }

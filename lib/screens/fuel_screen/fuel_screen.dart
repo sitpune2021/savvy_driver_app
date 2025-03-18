@@ -86,6 +86,7 @@ class _FuelScreenState extends State<FuelScreen> {
         child: const Icon(Icons.add, color: Colors.white),
       ),
       body: RefreshIndicator(
+        color: Colors.blue,
         backgroundColor: Colors.white,
         onRefresh: _fetchFuelData,
         child: Padding(
@@ -147,6 +148,8 @@ class _FuelScreenState extends State<FuelScreen> {
                             vehicleNo: item.vehicleNo,
                             totalFuel: item.totalFuel,
                             price: item.price,
+                            filepath1: item.filepath1,
+                            filepath2: item.filepath2,
                           ),
                         ),
                       );

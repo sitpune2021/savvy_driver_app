@@ -55,14 +55,11 @@ class _FuelFormState extends State<FuelForm> {
 
   void _submitForm() async {
     if (selectedDate == null ||
-            _vehicleNumberController.text.isEmpty ||
-            _fuelAmountController.text.isEmpty ||
-            _priceController.text.isEmpty
-        // ||
-        // meterPhoto == null ||
-        // receiptPhoto == null
-
-        ) {
+        _vehicleNumberController.text.isEmpty ||
+        _fuelAmountController.text.isEmpty ||
+        _priceController.text.isEmpty ||
+        meterPhoto == null ||
+        receiptPhoto == null) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
             content: Text('Please fill all fields and upload images')),
@@ -73,7 +70,9 @@ class _FuelFormState extends State<FuelForm> {
           selectedDate2.toString(),
           _vehicleNumberController.text.trim(),
           _priceController.text.trim(),
-          _fuelAmountController.text.trim());
+          _fuelAmountController.text.trim(),
+          meterPhoto,
+          receiptPhoto);
 
       if (result) {
         _vehicleNumberController.clear();
@@ -262,22 +261,62 @@ class _FuelFormState extends State<FuelForm> {
   }
 
   Widget _buildUploadButton(String label, bool isMeterPhoto) {
-    return GestureDetector(
-      onTap: () => _pickImage(isMeterPhoto),
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 14),
-        decoration: BoxDecoration(
-          border: Border.all(color: Colors.blue),
-          borderRadius: BorderRadius.circular(8),
+    File? selectedPhoto = isMeterPhoto ? meterPhoto : receiptPhoto;
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        GestureDetector(
+          onTap: () => _pickImage(isMeterPhoto),
+          child: Container(
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 14),
+            decoration: BoxDecoration(
+              border: Border.all(color: Colors.blue),
+              borderRadius: BorderRadius.circular(8),
+            ),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(label, style: const TextStyle(color: Colors.black)),
+                const Icon(Icons.upload, color: Colors.blue, size: 20),
+              ],
+            ),
+          ),
         ),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Text(label, style: const TextStyle(color: Colors.black)),
-            const Icon(Icons.upload, color: Colors.blue, size: 20),
-          ],
-        ),
-      ),
+        const SizedBox(height: 8),
+        if (selectedPhoto != null) // Show image preview if a photo is selected
+          Stack(
+            children: [
+              Container(
+                height: 100,
+                width: double.infinity,
+                decoration: BoxDecoration(
+                  border: Border.all(color: Colors.blue),
+                  borderRadius: BorderRadius.circular(8),
+                  image: DecorationImage(
+                    image: FileImage(selectedPhoto),
+                    fit: BoxFit.cover,
+                  ),
+                ),
+              ),
+              Positioned(
+                  top: 0,
+                  right: 0,
+                  child: IconButton(
+                    onPressed: () {
+                      setState(() {
+                        if (isMeterPhoto) {
+                          meterPhoto = null; // Reset meter photo
+                        } else {
+                          receiptPhoto = null; // Reset receipt photo
+                        }
+                      });
+                    },
+                    icon: const Icon(Icons.close, color: Colors.red),
+                  )),
+            ],
+          )
+      ],
     );
   }
 

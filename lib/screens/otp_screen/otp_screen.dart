@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:pin_code_fields/pin_code_fields.dart';
 import 'package:savvy_aqua_delivery/constants/color_constants.dart';
 import 'package:savvy_aqua_delivery/screens/dashboard_screen/dashboard_screen.dart';
+import 'package:savvy_aqua_delivery/services/auth.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class OtpScreen extends StatefulWidget {
@@ -12,6 +13,7 @@ class OtpScreen extends StatefulWidget {
 }
 
 class _OtpScreenState extends State<OtpScreen> {
+  bool resetOtp = false;
   late TextEditingController otpController;
 
   @override
@@ -107,30 +109,78 @@ class _OtpScreenState extends State<OtpScreen> {
                             inactiveColor: Colors.grey.shade400,
                           ),
                           onCompleted: (v) async {
-                            SharedPreferences prefs =
-                                await SharedPreferences.getInstance();
-                            final otp = prefs.getString("otp");
+                            if (resetOtp == false) {
+                              SharedPreferences prefs =
+                                  await SharedPreferences.getInstance();
+                              final otp = prefs.getString("otp");
 
-                            if (otp == v) {
-                              otpController.clear();
-                              prefs.setBool("isLoggedIn", true);
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                  const SnackBar(
-                                      content: Text("Login Successful")));
-                              Navigator.pushAndRemoveUntil(
-                                context,
-                                MaterialPageRoute(
-                                    builder: (context) =>
-                                        const DashboardScreen()),
-                                (route) =>
-                                    false, // This removes all previous routes
-                              );
+                              if (otp == v) {
+                                otpController.clear();
+                                prefs.setBool("isLoggedIn", true);
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                    const SnackBar(
+                                        content: Text("Login Successful")));
+                                Navigator.pushAndRemoveUntil(
+                                  context,
+                                  MaterialPageRoute(
+                                      builder: (context) =>
+                                          const DashboardScreen()),
+                                  (route) =>
+                                      false, // This removes all previous routes
+                                );
+                              } else {
+                                otpController.clear();
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                    const SnackBar(
+                                        content: Text(
+                                            "Incorrect OTP! Please enter a valid OTP")));
+                              }
                             } else {
-                              otpController.clear();
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                  const SnackBar(
-                                      content: Text(
-                                          "Incorrect OTP! Please enter a valid OTP")));
+                              SharedPreferences prefs =
+                                  await SharedPreferences.getInstance();
+
+                              // final phone = prefs.getString("phone");
+
+                              // bool result = await Auth.login(phone!);
+
+                              // print(
+                              //     "--------------------------------------login result: $result");
+
+                              // if (result) {
+                              final otp = prefs.getString("otp");
+                              if (otp == v) {
+                                otpController.clear();
+                                prefs.setBool("isLoggedIn", true);
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                    const SnackBar(
+                                        content: Text("Login Successful")));
+                                Navigator.pushAndRemoveUntil(
+                                  context,
+                                  MaterialPageRoute(
+                                      builder: (context) =>
+                                          const DashboardScreen()),
+                                  (route) =>
+                                      false, // This removes all previous routes
+                                );
+                                setState(() {
+                                  resetOtp = false;
+                                });
+                              } else {
+                                otpController.clear();
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                    const SnackBar(
+                                        content: Text(
+                                            "Incorrect OTP! Please enter a valid OTP")));
+                                setState(() {
+                                  resetOtp = false;
+                                });
+                              }
+                              // } else {
+                              //   ScaffoldMessenger.of(context).showSnackBar(
+                              //       const SnackBar(
+                              //           content: Text(
+                              //               "Something went wrong please check internet connection")));
+                              // }
                             }
                           },
                         ),
@@ -141,8 +191,19 @@ class _OtpScreenState extends State<OtpScreen> {
                           children: [
                             const Text("Didn’t receive the code?"),
                             TextButton(
-                              onPressed: () {
-                                // Implement resend OTP logic
+                              onPressed: () async {
+                                setState(() {
+                                  resetOtp = true;
+                                });
+                                SharedPreferences prefs =
+                                    await SharedPreferences.getInstance();
+
+                                final phone = prefs.getString("phone");
+
+                                bool result = await Auth.login(phone!);
+
+                                print(
+                                    "--------------------------------------login result: $result");
                               },
                               child: const Text("Send Again",
                                   style: TextStyle(color: Colors.blue)),

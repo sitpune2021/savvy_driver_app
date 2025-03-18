@@ -6,13 +6,15 @@ class MaintenanceDetails extends StatefulWidget {
   final String maintenanceDescription;
   final String totalAmount;
   final String createdAt;
+  final String filepath;
   const MaintenanceDetails(
       {super.key,
       required this.vehicleNo,
       required this.maintenanceType,
       required this.maintenanceDescription,
       required this.totalAmount,
-      required this.createdAt});
+      required this.createdAt,
+      required this.filepath});
 
   @override
   State<MaintenanceDetails> createState() => _MaintenanceDetailsState();
@@ -24,7 +26,7 @@ class _MaintenanceDetailsState extends State<MaintenanceDetails> {
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
-        iconTheme: IconThemeData(color: Colors.white),
+        iconTheme: const IconThemeData(color: Colors.white),
         backgroundColor: Colors.blue,
         elevation: 0,
         title: const Text(
@@ -62,7 +64,7 @@ class _MaintenanceDetailsState extends State<MaintenanceDetails> {
                 const SizedBox(height: 4),
                 Text(
                   widget.maintenanceDescription,
-                  style: TextStyle(color: Colors.black87),
+                  style: const TextStyle(color: Colors.black87),
                 ),
                 const Divider(height: 30),
                 _buildTotalAmount(widget.totalAmount),
@@ -112,7 +114,8 @@ class _MaintenanceDetailsState extends State<MaintenanceDetails> {
           ),
           child: Text(
             amount,
-            style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+            style: const TextStyle(
+                color: Colors.white, fontWeight: FontWeight.bold),
           ),
         ),
       ],
@@ -128,28 +131,126 @@ class _MaintenanceDetailsState extends State<MaintenanceDetails> {
           style: TextStyle(fontWeight: FontWeight.bold),
         ),
         const SizedBox(height: 8),
-        Container(
-          padding: const EdgeInsets.all(12),
-          decoration: BoxDecoration(
-            border: Border.all(color: Colors.blue),
-            borderRadius: BorderRadius.circular(8),
+        GestureDetector(
+          onTap: () {
+            _showFullImage(context, widget.filepath);
+          },
+          child: Container(
+            padding: const EdgeInsets.all(12),
+            decoration: BoxDecoration(
+              border: Border.all(color: Colors.blue),
+              borderRadius: BorderRadius.circular(8),
+            ),
+            child: widget.filepath.isNotEmpty
+                ? Image.network(
+                    widget.filepath,
+                    fit: BoxFit.cover,
+                    width: 100,
+                    height: 100,
+                    loadingBuilder: (context, child, loadingProgress) {
+                      if (loadingProgress == null) {
+                        return child; // Image fully loaded
+                      }
+                      return SizedBox(
+                        width: 100,
+                        height: 100,
+                        child: Center(
+                          child: CircularProgressIndicator(
+                            color: Colors.blue,
+                            value: loadingProgress.expectedTotalBytes != null
+                                ? loadingProgress.cumulativeBytesLoaded /
+                                    (loadingProgress.expectedTotalBytes ?? 1)
+                                : null,
+                          ),
+                        ),
+                      ); // Show loading indicator
+                    },
+                    errorBuilder: (context, error, stackTrace) => const Icon(
+                        Icons.broken_image,
+                        color: Colors.red,
+                        size: 40),
+                  )
+                : const Icon(Icons.insert_drive_file,
+                    color: Colors.blue, size: 40),
           ),
-          child:
-              const Icon(Icons.insert_drive_file, color: Colors.blue, size: 40),
         ),
       ],
     );
   }
 
+// Method to show image in full screen
+  void _showFullImage(BuildContext context, String image) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return Dialog(
+          backgroundColor: Colors.transparent,
+          insetPadding: EdgeInsets.zero,
+          child: Stack(
+            children: [
+              InteractiveViewer(
+                minScale: 0.5,
+                maxScale: 3.0,
+                child: Image.network(
+                  image,
+                  errorBuilder: (context, error, stackTrace) {
+                    print("Error in full screen image: $error");
+                    return Container(
+                      color: Colors.black,
+                      child: const Center(
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Icon(Icons.broken_image,
+                                size: 100, color: Colors.white),
+                            SizedBox(height: 20),
+                            Text(
+                              "Failed to load image",
+                              style:
+                                  TextStyle(color: Colors.white, fontSize: 18),
+                            ),
+                          ],
+                        ),
+                      ),
+                    );
+                  },
+                ),
+              ),
+              Positioned(
+                top: 20,
+                right: 20,
+                child: GestureDetector(
+                  onTap: () => Navigator.pop(context),
+                  child: Container(
+                    padding: const EdgeInsets.all(8),
+                    decoration: const BoxDecoration(
+                      color: Colors.black54,
+                      shape: BoxShape.circle,
+                    ),
+                    child: const Icon(
+                      Icons.close,
+                      color: Colors.white,
+                      size: 24,
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
   Widget _buildStatus() {
-    return Row(
+    return const Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        const Text(
+        Text(
           "Status",
           style: TextStyle(fontWeight: FontWeight.bold),
         ),
-        const Text(
+        Text(
           "Approved",
           style: TextStyle(color: Colors.green, fontWeight: FontWeight.bold),
         ),

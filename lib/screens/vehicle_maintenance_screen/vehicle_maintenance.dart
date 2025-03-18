@@ -190,6 +190,7 @@ class _VehicleMaintenanceState extends State<VehicleMaintenance> {
                                                 data.maintenanceDescription,
                                             totalAmount: data.totalAmount,
                                             createdAt: data.createdAt,
+                                            filepath: data.filepath,
                                           )));
 
                                   if (result == true) {

@@ -235,7 +235,7 @@ class _TrackOrderState extends State<TrackOrder> {
                         PageTransition(
                             type: PageTransitionType.rightToLeft,
                             child: OrderConfirmation(
-                              orderId: widget.order.id,
+                              orderId: widget.order.orderId,
                             )));
                   },
                   style: ElevatedButton.styleFrom(

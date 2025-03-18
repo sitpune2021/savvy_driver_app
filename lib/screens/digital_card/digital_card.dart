@@ -1,4 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart';
+import 'dart:convert';
+import 'package:http/http.dart' as http;
+import 'package:intl/intl.dart';
+import 'package:savvy_aqua_delivery/model/digital_card_model.dart';
+import 'package:savvy_aqua_delivery/services/auth.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class DigitalCard extends StatefulWidget {
   @override
@@ -6,15 +13,35 @@ class DigitalCard extends StatefulWidget {
 }
 
 class _DigitalCardState extends State<DigitalCard> {
-  List<Map<String, String>> data = List.generate(
-    22,
-    (index) => {
-      "srNo": "${index + 1}",
-      "date": "12-03-2025",
-      "deliveredJars": "10",
-      "receivedJars": "10",
-    },
-  );
+  List<DigitalCardModel> digitalCards = [];
+  bool _isLoading = false;
+
+  @override
+  void initState() {
+    super.initState();
+    fetchDigitalCard();
+  }
+
+  Future<void> fetchDigitalCard() async {
+    setState(() {
+      _isLoading = true;
+    });
+
+    try {
+      List<DigitalCardModel> list = await Auth.fetchDigitalCard();
+      setState(() {
+        digitalCards = list;
+      });
+    } catch (e) {
+      if (kDebugMode) {
+        print("Error fetching digital card data: $e");
+      }
+    } finally {
+      setState(() {
+        _isLoading = false;
+      });
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -28,33 +55,54 @@ class _DigitalCardState extends State<DigitalCard> {
         ),
         backgroundColor: Colors.blue,
       ),
-      body: Padding(
-        padding: const EdgeInsets.all(8.0),
-        child: SingleChildScrollView(
-          scrollDirection: Axis.horizontal,
-          child: SingleChildScrollView(
-            child: DataTable(
-              border: TableBorder.all(color: Colors.blue),
-              columns: const [
-                DataColumn(label: Text("Sr. No")),
-                DataColumn(label: Text("Date")),
-                DataColumn(label: Text("No of full \nDelivered Jars")),
-                DataColumn(label: Text("No of \nempty Jars")),
-                DataColumn(label: Text("Action")),
-              ],
-              rows: data.map((item) {
-                return DataRow(cells: [
-                  DataCell(Text(item["srNo"]!)),
-                  DataCell(Text(item["date"]!)),
-                  DataCell(Text(item["deliveredJars"]!)),
-                  DataCell(Text(item["receivedJars"]!)),
-                  const DataCell(Icon(Icons.edit)),
-                ]);
-              }).toList(),
+      body: _isLoading
+          ? const Center(child: CircularProgressIndicator(color: Colors.blue))
+          : Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: SingleChildScrollView(
+                scrollDirection: Axis.horizontal,
+                child: SingleChildScrollView(
+                  child: DataTable(
+                    border: TableBorder.all(color: Colors.blue),
+                    columns: const [
+                      DataColumn(label: Text("Sr. No")),
+                      DataColumn(label: Text("Date")),
+                      DataColumn(label: Text("No of full \nDelivered Jars")),
+                      DataColumn(label: Text("No of \nempty Jars")),
+                      // DataColumn(label: Text("Action")),
+                    ],
+                    rows: digitalCards.isEmpty
+                        ? [
+                            const DataRow(cells: [
+                              DataCell(Text("No data available")),
+                              DataCell(Text("-")),
+                              DataCell(Text("-")),
+                              DataCell(Text("-")),
+                              // DataCell(Text("-")),
+                            ])
+                          ]
+                        : digitalCards.asMap().entries.map((entry) {
+                            int index = entry.key + 1;
+                            DigitalCardModel item = entry.value;
+
+                            return DataRow(cells: [
+                              DataCell(Text(index.toString())),
+                              DataCell(Text(DateFormat("dd-MM-yyyy")
+                                  .format(item.createdAt))),
+                              DataCell(Text(item.deliverQty)),
+                              DataCell(Text(item.returnQty)),
+                              // DataCell(IconButton(
+                              //   icon: const Icon(Icons.edit),
+                              //   onPressed: () {
+                              //     // Implement edit action
+                              //   },
+                              // )),
+                            ]);
+                          }).toList(),
+                  ),
+                ),
+              ),
             ),
-          ),
-        ),
-      ),
     );
   }
 }

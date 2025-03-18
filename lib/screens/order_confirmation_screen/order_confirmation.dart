@@ -1,7 +1,9 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:page_transition/page_transition.dart';
 import 'package:savvy_aqua_delivery/screens/dashboard_screen/dashboard_screen.dart';
-import 'package:savvy_aqua_delivery/screens/order_screen/order_screen.dart';
 import 'package:savvy_aqua_delivery/services/auth.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -9,6 +11,7 @@ class OrderConfirmation extends StatefulWidget {
   final String orderId;
 
   const OrderConfirmation({super.key, required this.orderId});
+
   @override
   _OrderConfirmationState createState() => _OrderConfirmationState();
 }
@@ -17,34 +20,28 @@ class _OrderConfirmationState extends State<OrderConfirmation> {
   final TextEditingController _deliveredItem = TextEditingController();
   final TextEditingController _returnedItem = TextEditingController();
 
-  List<String> deliveredImages = [
-    'assets/images/bottle.png',
-    'assets/images/bottle.png',
-  ];
-  List<String> returnedImages = [
-    'assets/images/bottle.png',
-    'assets/images/bottle.png',
-  ];
+  File? deliveredImage;
+  File? returnedImage;
 
   void _submitForm() async {
     String returnedItem = _returnedItem.text.trim();
     String deliveredItem = _deliveredItem.text.trim();
 
-    if (returnedItem.isEmpty || deliveredItem.isEmpty) {
+    if (returnedItem.isEmpty ||
+        deliveredItem.isEmpty ||
+        deliveredImage == null ||
+        returnedImage == null) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Please fill all fields')),
+        const SnackBar(content: Text('Please fill all fields and add photo')),
       );
       return;
     } else {
-      bool result = await Auth.orderConfirmation(
-          widget.orderId, returnedItem, deliveredItem);
-
+      bool result = await Auth.orderConfirmation(widget.orderId, returnedItem,
+          deliveredItem, deliveredImage, returnedImage);
       if (result) {
         _returnedItem.clear();
         _deliveredItem.clear();
         SharedPreferences prefs = await SharedPreferences.getInstance();
-
-        // Add a delay of 1 second before navigating
         Future.delayed(const Duration(milliseconds: 500), () {
           prefs.setString("navTwo", "true");
           Navigator.pushAndRemoveUntil(
@@ -63,8 +60,20 @@ class _OrderConfirmationState extends State<OrderConfirmation> {
         );
       }
     }
+  }
 
-    // Handle form submission logic here
+  Future<void> _pickImage(bool isDelivered) async {
+    final pickedFile =
+        await ImagePicker().pickImage(source: ImageSource.gallery);
+    if (pickedFile != null) {
+      setState(() {
+        if (isDelivered) {
+          deliveredImage = File(pickedFile.path);
+        } else {
+          returnedImage = File(pickedFile.path);
+        }
+      });
+    }
   }
 
   @override
@@ -85,30 +94,12 @@ class _OrderConfirmationState extends State<OrderConfirmation> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Card(
-                  color: Colors.white,
-                  shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(10)),
-                  elevation: 5,
-                  child: Padding(
-                    padding: const EdgeInsets.all(8.0),
-                    child: _buildSection(
-                        "Delivered Items", deliveredImages, 20, _deliveredItem),
-                  )),
+              _buildSection(
+                  "Delivered Item", deliveredImage, _deliveredItem, true),
               const SizedBox(height: 20),
-              Card(
-                  color: Colors.white,
-                  shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(10)),
-                  elevation: 5,
-                  child: Padding(
-                    padding: const EdgeInsets.all(8.0),
-                    child: _buildSection(
-                        "Returned Bottles", returnedImages, 40, _returnedItem),
-                  )),
-              const SizedBox(
-                height: 20,
-              ),
+              _buildSection(
+                  "Returned Bottle", returnedImage, _returnedItem, false),
+              const SizedBox(height: 20),
               _buildSubmitButton(),
             ],
           ),
@@ -117,117 +108,98 @@ class _OrderConfirmationState extends State<OrderConfirmation> {
     );
   }
 
-  Widget _buildSection(String title, List<String> images, int count,
-      TextEditingController controller) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+  Widget _buildSection(String title, File? image,
+      TextEditingController controller, bool isDelivered) {
+    File? selectedPhoto = isDelivered ? deliveredImage : returnedImage;
+
+    return Card(
+      color: Colors.white,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+      elevation: 5,
+      child: Padding(
+        padding: const EdgeInsets.all(8.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(
-              title,
-              style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-            ),
-            SizedBox(
-              width: 80, // Set a fixed width
-              child: TextField(
-                controller: controller,
-                decoration: InputDecoration(
-                  label: const Text(
-                    "count",
-                    style: TextStyle(color: Colors.blue),
-                  ),
-                  hintText: "count", // Use count as initial value
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  enabledBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(8),
-                    borderSide: const BorderSide(
-                        color: Colors.blue), // Default border color
-                  ),
-                  focusedBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(8),
-                    borderSide: const BorderSide(
-                        color: Colors.blue, width: 2), // Blue when focused
-                  ),
-                  contentPadding:
-                      const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  title,
+                  style: const TextStyle(
+                      fontSize: 18, fontWeight: FontWeight.bold),
                 ),
-              ),
+                SizedBox(
+                  width: 80, // Set a fixed width
+                  child: TextField(
+                    controller: controller,
+                    decoration: InputDecoration(
+                      label: const Text(
+                        "count",
+                        style: TextStyle(color: Colors.blue),
+                      ),
+                      hintText: "count", // Use count as initial value
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      enabledBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(8),
+                        borderSide: const BorderSide(
+                            color: Colors.blue), // Default border color
+                      ),
+                      focusedBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(8),
+                        borderSide: const BorderSide(
+                            color: Colors.blue, width: 2), // Blue when focused
+                      ),
+                      contentPadding: const EdgeInsets.symmetric(
+                          horizontal: 12, vertical: 10),
+                    ),
+                  ),
+                ),
+              ],
             ),
+            const SizedBox(height: 10),
+            GestureDetector(
+                onTap: () => _pickImage(isDelivered),
+                child: Stack(
+                  children: [
+                    Container(
+                      width: 100,
+                      height: 100,
+                      decoration: BoxDecoration(
+                        color: Colors.grey[200],
+                        borderRadius: BorderRadius.circular(8),
+                        border: Border.all(color: Colors.grey.shade400),
+                        image: image != null
+                            ? DecorationImage(
+                                image: FileImage(image), fit: BoxFit.cover)
+                            : null,
+                      ),
+                      child: image == null
+                          ? const Icon(Icons.add, size: 30, color: Colors.grey)
+                          : null,
+                    ),
+                    if (selectedPhoto != null)
+                      Positioned(
+                          top: 0,
+                          right: 0,
+                          child: IconButton(
+                            onPressed: () {
+                              setState(() {
+                                if (isDelivered) {
+                                  deliveredImage = null; // Reset meter photo
+                                } else {
+                                  returnedImage = null; // Reset receipt photo
+                                }
+                              });
+                            },
+                            icon: const Icon(Icons.close, color: Colors.red),
+                          )),
+                  ],
+                )),
           ],
         ),
-        const SizedBox(height: 10),
-        Container(
-          decoration: BoxDecoration(
-            border: Border.all(color: Colors.grey.shade300),
-            borderRadius: BorderRadius.circular(12),
-          ),
-          padding: const EdgeInsets.all(10),
-          child: Wrap(
-            spacing: 10,
-            runSpacing: 10,
-            children: [
-              ...images.map((image) => _buildImageCard(image)).toList(),
-              _buildAddPhotoButton(),
-            ],
-          ),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildImageCard(String imagePath) {
-    return Stack(
-      children: [
-        Container(
-          width: 80,
-          height: 80,
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(8),
-            image: DecorationImage(
-              image: AssetImage(imagePath),
-              fit: BoxFit.cover,
-            ),
-          ),
-        ),
-        Positioned(
-          top: 4,
-          right: 4,
-          child: GestureDetector(
-            onTap: () {
-              setState(() {
-                deliveredImages.remove(imagePath);
-                returnedImages.remove(imagePath);
-              });
-            },
-            child: const CircleAvatar(
-              radius: 12,
-              backgroundColor: Colors.white,
-              child: Icon(Icons.close, size: 16, color: Colors.red),
-            ),
-          ),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildAddPhotoButton() {
-    return GestureDetector(
-      onTap: () {
-        // Handle photo upload action
-      },
-      child: Container(
-        width: 80,
-        height: 80,
-        decoration: BoxDecoration(
-          color: Colors.grey[200],
-          borderRadius: BorderRadius.circular(8),
-          border: Border.all(color: Colors.grey.shade400),
-        ),
-        child: const Icon(Icons.add, size: 30, color: Colors.grey),
       ),
     );
   }
@@ -235,10 +207,7 @@ class _OrderConfirmationState extends State<OrderConfirmation> {
   Widget _buildSubmitButton() {
     return Center(
       child: ElevatedButton(
-        onPressed: () {
-          // Handle submit action
-          _submitForm();
-        },
+        onPressed: _submitForm,
         style: ElevatedButton.styleFrom(
           backgroundColor: Colors.blue,
           minimumSize: const Size(double.infinity, 50),

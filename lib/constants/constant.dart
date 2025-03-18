@@ -8,4 +8,7 @@ class Constant {
   static const viewMaintenance = "${baseurl}APP_MaintenanceView";
   static const veiwAllOrder = "${baseurl}APP_OrdersViewAll";
   static const confirmOrder = "${baseurl}APP_OrdersQtyUpdate";
+  static const digitalCard = "${baseurl}APP_DriverDigitalCard";
+  static const orderDetails = "${baseurl}APP_OrdersDetailsViewAll";
+  static const orderStatistics = "${baseurl}APP_DashboardAPI";
 }

@@ -1,7 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import 'package:page_transition/page_transition.dart';
+import 'package:savvy_aqua_delivery/model/order_model.dart';
 import 'package:savvy_aqua_delivery/screens/order_screen/completed_order_details/completed_order_details.dart';
 import 'package:savvy_aqua_delivery/screens/track_order_screen/track_order.dart';
+import 'package:savvy_aqua_delivery/services/auth.dart';
+import 'package:shimmer/shimmer.dart';
 
 class CompletedOrders extends StatefulWidget {
   const CompletedOrders({super.key});
@@ -20,69 +24,77 @@ class _CompletedOrdersState extends State<CompletedOrders> {
         "*******************************************************REFRESHED*******************************");
   }
 
-  final List<Map<String, String>> orders = [
-    {
-      "id": "#ORD97",
-      "name": "Prajwal Punekar",
-      "address": "Santosh Nagar, Chinchwad Pune",
-      "date": "17 Feb 2025",
-      "quantity": "20 Bottles",
-      "status": "Completed",
-    },
-    {
-      "id": "#ORD98",
-      "name": "Rahul Sharma",
-      "address": "Wakad, Pune",
-      "date": "18 Feb 2025",
-      "quantity": "15 Bottles",
-      "status": "Completed",
-    },
-    {
-      "id": "#ORD99",
-      "name": "Neha Verma",
-      "address": "Hinjewadi, Pune",
-      "date": "19 Feb 2025",
-      "quantity": "25 Bottles",
-      "status": "Completed",
-    },
-  ];
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.white,
       body: RefreshIndicator(
-        backgroundColor: Colors.white,
-        onRefresh: _refreshData,
-        child: ListView.builder(
-          padding: const EdgeInsets.all(10),
-          itemCount: orders.length,
-          itemBuilder: (context, index) {
-            return GestureDetector(
-                onTap: () {
-                  Navigator.push(
-                      context,
-                      PageTransition(
-                          type: PageTransitionType.rightToLeft,
-                          duration: const Duration(milliseconds: 200),
-                          reverseDuration: const Duration(milliseconds: 200),
-                          child: CompletedOrderDetails()));
+          color: Colors.blue,
+          backgroundColor: Colors.white,
+          onRefresh: _refreshData,
+          child: FutureBuilder<List<OrderModel>>(
+            future: Auth.completedOrderList(),
+            builder: (context, snapshot) {
+              if (snapshot.connectionState == ConnectionState.waiting) {
+                // Show shimmer effect while fetching data
+                return ListView.builder(
+                  itemCount: 15, // Display shimmer for 6 placeholder items
+                  itemBuilder: (context, index) {
+                    return Shimmer.fromColors(
+                      baseColor: Colors.grey[300]!,
+                      highlightColor: Colors.grey[100]!,
+                      child: Container(
+                        margin: const EdgeInsets.symmetric(
+                            vertical: 5, horizontal: 12),
+                        height: 200,
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                      ),
+                    );
+                  },
+                );
+              } else if (snapshot.hasError) {
+                return const Center(child: Text("Error loading data"));
+              } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
+                return const Center(child: Text("No Data Available"));
+              }
+              final orders = snapshot.data!;
+              return ListView.builder(
+                padding: const EdgeInsets.all(10),
+                itemCount: orders.length,
+                itemBuilder: (context, index) {
+                  return GestureDetector(
+                      onTap: () {
+                        Navigator.push(
+                            context,
+                            PageTransition(
+                                type: PageTransitionType.rightToLeft,
+                                duration: const Duration(milliseconds: 200),
+                                reverseDuration:
+                                    const Duration(milliseconds: 200),
+                                child: CompletedOrderDetails(
+                                    order: orders[index])));
+                      },
+                      child: OrderCard(order: orders[index]));
                 },
-                child: OrderCard(order: orders[index]));
-          },
-        ),
-      ),
+              );
+            },
+          )),
     );
   }
 }
 
 class OrderCard extends StatelessWidget {
-  final Map<String, String> order;
+  final OrderModel order;
 
   OrderCard({required this.order});
 
   @override
   Widget build(BuildContext context) {
+    DateTime orderDate = DateFormat("yyyy-MM-dd").parse(order.createdAt);
+    String date = "${orderDate.day}-${orderDate.month}-${orderDate.year}";
     return Card(
       color: Colors.white,
       margin: const EdgeInsets.symmetric(vertical: 8, horizontal: 5),
@@ -93,18 +105,17 @@ class OrderCard extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(order["id"]!,
+            Text(order.orderId,
                 style: const TextStyle(
                     color: Colors.blue, fontWeight: FontWeight.bold)),
             const SizedBox(height: 5),
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Text(order["name"]!,
+                Text(order.customerName,
                     style: const TextStyle(
                         fontSize: 16, fontWeight: FontWeight.bold)),
-                Text(order["date"]!,
-                    style: const TextStyle(color: Colors.grey)),
+                Text(date, style: const TextStyle(color: Colors.black)),
               ],
             ),
             const SizedBox(height: 5),
@@ -113,20 +124,20 @@ class OrderCard extends StatelessWidget {
                 const Icon(Icons.location_on, color: Colors.blue, size: 18),
                 const SizedBox(width: 5),
                 Expanded(
-                  child: Text(order["address"]!,
+                  child: Text(order.customerAddress,
                       style: const TextStyle(color: Colors.black54)),
                 ),
               ],
             ),
-            const Divider(),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                const Text("Quantity", style: TextStyle(color: Colors.black54)),
-                Text(order["quantity"]!,
-                    style: const TextStyle(fontWeight: FontWeight.bold)),
-              ],
-            ),
+            // const Divider(),
+            // Row(
+            //   mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            //   children: [
+            //     const Text("Quantity", style: TextStyle(color: Colors.black54)),
+            //     Text("${order.qty} Bottles",
+            //         style: const TextStyle(fontWeight: FontWeight.bold)),
+            //   ],
+            // ),
             const Divider(),
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -137,7 +148,7 @@ class OrderCard extends StatelessWidget {
                   children: [
                     const Icon(Icons.circle, color: Colors.green, size: 12),
                     const SizedBox(width: 5),
-                    Text(order["status"]!,
+                    Text(order.status,
                         style: const TextStyle(color: Colors.black)),
                   ],
                 ),

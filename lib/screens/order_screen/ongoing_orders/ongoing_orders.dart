@@ -48,6 +48,7 @@ class _OngoingOrdersState extends State<OngoingOrders> {
         child: const Icon(Icons.map_outlined, color: Colors.white),
       ),
       body: RefreshIndicator(
+          color: Colors.blue,
           backgroundColor: Colors.white,
           onRefresh: _refreshData,
           child: FutureBuilder<List<OrderModel>>(

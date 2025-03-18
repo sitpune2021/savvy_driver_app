@@ -7,6 +7,8 @@ class FuelModel {
   final String totalFuel;
   final String isDeleted;
   final String createdAt;
+  final String filepath1;
+  final String filepath2;
 
   FuelModel({
     required this.id,
@@ -17,6 +19,8 @@ class FuelModel {
     required this.totalFuel,
     required this.isDeleted,
     required this.createdAt,
+    required this.filepath1,
+    required this.filepath2,
   });
 
   // Factory method to create a FuelModel from a JSON map
@@ -30,6 +34,8 @@ class FuelModel {
       totalFuel: json['total_fule'] ?? '',
       isDeleted: json['isdeleted'] ?? '',
       createdAt: json['created_at'] ?? '',
+      filepath1: json['filepath1'] ?? '',
+      filepath2: json['filepath2'] ?? '',
     );
   }
 
@@ -44,11 +50,13 @@ class FuelModel {
       'total_fule': totalFuel,
       'isdeleted': isDeleted,
       'created_at': createdAt,
+      'filepath1': filepath1,
+      'filepath2': filepath2,
     };
   }
 
   @override
   String toString() {
-    return 'FuelModel(id: $id, driverId: $driverId, date: $date, vehicleNo: $vehicleNo, price: $price, totalFuel: $totalFuel, isDeleted: $isDeleted, createdAt: $createdAt)';
+    return 'FuelModel(id: $id, driverId: $driverId, date: $date, vehicleNo: $vehicleNo, price: $price, totalFuel: $totalFuel, isDeleted: $isDeleted, createdAt: $createdAt filepath2: $filepath2,filepath1: $filepath1)';
   }
 }

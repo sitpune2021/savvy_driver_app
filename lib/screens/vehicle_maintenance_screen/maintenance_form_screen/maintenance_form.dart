@@ -47,7 +47,7 @@ class _MaintenanceFormState extends State<MaintenanceForm> {
       return;
     } else {
       bool result = await Auth.addMaintenance(
-          vehicleNumber, maintenanceType, description, totalAmount);
+          vehicleNumber, maintenanceType, description, totalAmount, _billImage);
 
       if (result) {
         _vehicleNumberController.clear();
@@ -95,7 +95,7 @@ class _MaintenanceFormState extends State<MaintenanceForm> {
                   _buildLabel("Vehicle Number"),
                   _buildTextField(_vehicleNumberController, "Enter Number"),
                   _buildLabel("Maintenance Type"),
-                  _buildTextField(_maintenanceTypeController, "Edit Text"),
+                  _buildTextField(_maintenanceTypeController, "Enter Type"),
                   _buildLabel("Description"),
                   _buildTextField(_descriptionController, "Enter Description"),
                   _buildLabel("Total Amount"),
@@ -122,9 +122,45 @@ class _MaintenanceFormState extends State<MaintenanceForm> {
                   ),
                   if (_billImage != null)
                     Padding(
-                      padding: const EdgeInsets.only(top: 8),
-                      child: Image.file(_billImage!, height: 100),
-                    ),
+                        padding: const EdgeInsets.only(top: 8),
+                        child: Stack(
+                          children: [
+                            Container(
+                              width: 100,
+                              height: 100,
+                              decoration: BoxDecoration(
+                                color: Colors.grey[200],
+                                borderRadius: BorderRadius.circular(8),
+                                border: Border.all(color: Colors.grey.shade400),
+                                image: _billImage != null
+                                    ? DecorationImage(
+                                        image: FileImage(_billImage!),
+                                        fit: BoxFit.cover)
+                                    : null,
+                              ),
+                              child: _billImage == null
+                                  ? const Icon(Icons.add,
+                                      size: 30, color: Colors.grey)
+                                  : null,
+                            ),
+                            if (_billImage != null)
+                              Positioned(
+                                  top: 0,
+                                  right: 0,
+                                  child: IconButton(
+                                    onPressed: () {
+                                      setState(() {
+                                        if (_billImage != null) {
+                                          _billImage =
+                                              null; // Reset meter photo
+                                        }
+                                      });
+                                    },
+                                    icon: const Icon(Icons.close,
+                                        color: Colors.red),
+                                  )),
+                          ],
+                        )),
                 ],
               ),
             ),
