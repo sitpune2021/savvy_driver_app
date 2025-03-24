@@ -16,6 +16,7 @@ class _OrderCardState extends State<OrderCard> {
   Widget build(BuildContext context) {
     DateTime orderDate = DateFormat("yyyy-MM-dd").parse(widget.order.createdAt);
     String date = "${orderDate.day}-${orderDate.month}-${orderDate.year}";
+    print("*******date $date");
     return Card(
       color: Colors.white,
       margin: const EdgeInsets.symmetric(vertical: 8, horizontal: 5),

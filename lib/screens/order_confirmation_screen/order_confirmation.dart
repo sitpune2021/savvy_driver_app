@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:page_transition/page_transition.dart';
+import 'package:permission_handler/permission_handler.dart';
 import 'package:savvy_aqua_delivery/screens/dashboard_screen/dashboard_screen.dart';
 import 'package:savvy_aqua_delivery/services/auth.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -27,12 +28,12 @@ class _OrderConfirmationState extends State<OrderConfirmation> {
     String returnedItem = _returnedItem.text.trim();
     String deliveredItem = _deliveredItem.text.trim();
 
-    if (returnedItem.isEmpty ||
-        deliveredItem.isEmpty ||
-        deliveredImage == null ||
-        returnedImage == null) {
+    if (returnedItem.isEmpty || deliveredItem.isEmpty
+        // deliveredImage == null ||
+        // returnedImage == null
+        ) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Please fill all fields and add photo')),
+        const SnackBar(content: Text('Please fill all fields')),
       );
       return;
     } else {
@@ -73,6 +74,50 @@ class _OrderConfirmationState extends State<OrderConfirmation> {
           returnedImage = File(pickedFile.path);
         }
       });
+    }
+  }
+
+  Future<void> _pickImagenew(bool isDelivered) async {
+    PermissionStatus status;
+
+    if (Platform.isAndroid) {
+      if (await Permission.photos.request().isGranted) {
+        status = PermissionStatus.granted;
+      } else if (await Permission.storage.request().isGranted) {
+        status = PermissionStatus.granted;
+      } else if (await Permission.mediaLibrary.request().isGranted) {
+        status = PermissionStatus.granted;
+      } else {
+        status = PermissionStatus.denied;
+      }
+    } else {
+      // iOS
+      status = await Permission.photos.request();
+    }
+
+    if (status.isGranted) {
+      final pickedFile = await ImagePicker().pickImage(
+        source: ImageSource.camera,
+      );
+
+      if (pickedFile != null) {
+        setState(() {
+          if (isDelivered) {
+            deliveredImage = File(pickedFile.path);
+          } else {
+            returnedImage = File(pickedFile.path);
+          }
+        });
+        print("************************deliveredImage$deliveredImage");
+        print("************************returnedImage$returnedImage");
+      }
+    } else if (status.isPermanentlyDenied) {
+      openAppSettings(); // Open settings if permanently denied
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+            content: Text("Permission denied. Cannot access photos.")),
+      );
     }
   }
 
@@ -161,7 +206,7 @@ class _OrderConfirmationState extends State<OrderConfirmation> {
             ),
             const SizedBox(height: 10),
             GestureDetector(
-                onTap: () => _pickImage(isDelivered),
+                onTap: () => _pickImagenew(isDelivered),
                 child: Stack(
                   children: [
                     Container(

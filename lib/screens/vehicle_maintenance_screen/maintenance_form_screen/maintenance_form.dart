@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:permission_handler/permission_handler.dart';
 import 'dart:io';
 
 import 'package:savvy_aqua_delivery/services/auth.dart';
@@ -28,6 +29,46 @@ class _MaintenanceFormState extends State<MaintenanceForm> {
       setState(() {
         _billImage = File(pickedFile.path);
       });
+    }
+  }
+
+  Future<void> _pickImagenew() async {
+    PermissionStatus status;
+
+    if (Platform.isAndroid) {
+      if (await Permission.photos.request().isGranted) {
+        status = PermissionStatus.granted;
+      } else if (await Permission.storage.request().isGranted) {
+        status = PermissionStatus.granted;
+      } else if (await Permission.mediaLibrary.request().isGranted) {
+        status = PermissionStatus.granted;
+      } else {
+        status = PermissionStatus.denied;
+      }
+    } else {
+      // iOS
+      status = await Permission.photos.request();
+    }
+
+    if (status.isGranted) {
+      final pickedFile = await ImagePicker().pickImage(
+        source: ImageSource.gallery,
+      );
+
+      if (pickedFile != null) {
+        setState(() {
+          _billImage = File(pickedFile.path);
+        });
+
+        print("************************_billImage$_billImage");
+      }
+    } else if (status.isPermanentlyDenied) {
+      openAppSettings(); // Open settings if permanently denied
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+            content: Text("Permission denied. Cannot access photos.")),
+      );
     }
   }
 
@@ -103,7 +144,7 @@ class _MaintenanceFormState extends State<MaintenanceForm> {
                   const Divider(),
                   _buildLabel("Bill"),
                   GestureDetector(
-                    onTap: _pickImage,
+                    onTap: _pickImagenew,
                     child: Container(
                       padding: const EdgeInsets.all(12),
                       decoration: BoxDecoration(

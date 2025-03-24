@@ -1,6 +1,8 @@
+import 'package:device_info_plus/device_info_plus.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:page_transition/page_transition.dart';
+import 'package:permission_handler/permission_handler.dart';
 import 'package:savvy_aqua_delivery/screens/fuel_screen/fuel_screen.dart';
 import 'dart:io';
 
@@ -36,6 +38,51 @@ class _FuelFormState extends State<FuelForm> {
         selectedDate = picked;
         selectedDate2 = "${picked.day}-${picked.month}-${picked.year}";
       });
+    }
+  }
+
+  Future<void> _pickImagenew(bool isMeterPhoto) async {
+    PermissionStatus status;
+
+    if (Platform.isAndroid) {
+      if (await Permission.photos.request().isGranted) {
+        status = PermissionStatus.granted;
+      } else if (await Permission.storage.request().isGranted) {
+        status = PermissionStatus.granted;
+      } else if (await Permission.mediaLibrary.request().isGranted) {
+        status = PermissionStatus.granted;
+      } else {
+        status = PermissionStatus.denied;
+      }
+    } else {
+      // iOS
+      status = await Permission.photos.request();
+    }
+
+    if (status.isGranted) {
+      final pickedFile = await ImagePicker().pickImage(
+        source: ImageSource.gallery,
+      );
+
+      if (pickedFile != null) {
+        setState(() {
+          if (isMeterPhoto) {
+            meterPhoto = File(pickedFile.path);
+          } else {
+            receiptPhoto = File(pickedFile.path);
+          }
+        });
+
+        print("************************meterPhoto$meterPhoto");
+        print("************************receiptPhoto$receiptPhoto");
+      }
+    } else if (status.isPermanentlyDenied) {
+      openAppSettings(); // Open settings if permanently denied
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+            content: Text("Permission denied. Cannot access photos.")),
+      );
     }
   }
 
@@ -267,7 +314,7 @@ class _FuelFormState extends State<FuelForm> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         GestureDetector(
-          onTap: () => _pickImage(isMeterPhoto),
+          onTap: () => _pickImagenew(isMeterPhoto),
           child: Container(
             padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 14),
             decoration: BoxDecoration(

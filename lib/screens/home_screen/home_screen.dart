@@ -72,6 +72,7 @@ class _HomeScreenState extends State<HomeScreen> {
     setState(() {});
     print(
         "*******************************************************REFRESHED*******************************");
+    fetchDashboardData();
   }
 
   @override

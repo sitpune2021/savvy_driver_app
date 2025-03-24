@@ -86,12 +86,14 @@ class Auth {
 
       // Attach images if available
       if (meterPhoto != null) {
+        print("📷 Meter Photo Path: ${meterPhoto.path}");
         request.files.add(await http.MultipartFile.fromPath(
             'file', // This should match your API parameter name
             meterPhoto.path));
       }
 
       if (receiptPhoto != null) {
+        print("📷 Receipt Photo Path: ${receiptPhoto.path}");
         request.files.add(await http.MultipartFile.fromPath(
           'file1', // This should match your API parameter name
           receiptPhoto.path,
