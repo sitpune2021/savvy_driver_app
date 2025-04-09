@@ -252,7 +252,22 @@ class _OrderConfirmationState extends State<OrderConfirmation> {
   Widget _buildSubmitButton() {
     return Center(
       child: ElevatedButton(
-        onPressed: _submitForm,
+        onPressed: () {
+          String returnedItem = _returnedItem.text.trim();
+          String deliveredItem = _deliveredItem.text.trim();
+
+          if (returnedItem.isEmpty || deliveredItem.isEmpty
+              // deliveredImage == null ||
+              // returnedImage == null
+              ) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(content: Text('Please fill all fields')),
+            );
+            return;
+          }
+          showConfirmationDialog(
+              context, _deliveredItem.text.trim(), _returnedItem.text.trim());
+        },
         style: ElevatedButton.styleFrom(
           backgroundColor: Colors.blue,
           minimumSize: const Size(double.infinity, 50),
@@ -262,6 +277,98 @@ class _OrderConfirmationState extends State<OrderConfirmation> {
         child: const Text("Submit",
             style: TextStyle(fontSize: 18, color: Colors.white)),
       ),
+    );
+  }
+
+  Future<void> showConfirmationDialog(
+      BuildContext context, String deliveredItem, String receivedItem) async {
+    return showDialog<void>(
+      context: context,
+      barrierDismissible: true,
+      builder: (BuildContext context) {
+        return Dialog(
+          backgroundColor: Colors.white,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16.0),
+          ),
+          child: Padding(
+            padding: const EdgeInsets.all(20.0),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const Text(
+                  "Order Confirmation",
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                const SizedBox(height: 20),
+                Text(
+                  "Delivered Items: $deliveredItem",
+                  textAlign: TextAlign.center,
+                  style: const TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                const SizedBox(height: 5),
+                Text(
+                  "Received Items: $receivedItem",
+                  textAlign: TextAlign.center,
+                  style: const TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                const SizedBox(height: 20),
+
+                // Delete Account Button
+                SizedBox(
+                  width: double.infinity,
+                  child: ElevatedButton(
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.blue,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                    ),
+                    onPressed: () async {
+                      _submitForm();
+                    },
+                    child: const Text(
+                      "OK",
+                      style: TextStyle(color: Colors.white, fontSize: 16),
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 10),
+
+                // Not Now Button
+                SizedBox(
+                  width: double.infinity,
+                  child: OutlinedButton(
+                    style: OutlinedButton.styleFrom(
+                      side: const BorderSide(color: Colors.blue),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                    ),
+                    onPressed: () {
+                      Navigator.pop(context);
+                    },
+                    child: const Text(
+                      "Cancel",
+                      style: TextStyle(color: Colors.red, fontSize: 16),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        );
+      },
     );
   }
 }

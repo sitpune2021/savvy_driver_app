@@ -173,8 +173,34 @@ class _CompletedOrderDetailsState extends State<CompletedOrderDetails> {
               borderRadius: BorderRadius.circular(8),
             ),
             child: imagePath != null && imagePath.startsWith("http")
-                ? Image.network(imagePath,
-                    width: 100, height: 100, fit: BoxFit.cover)
+                ? Image.network(
+                    imagePath,
+                    width: 100,
+                    height: 100,
+                    fit: BoxFit.cover,
+                    loadingBuilder: (context, child, loadingProgress) {
+                      if (loadingProgress == null) {
+                        return child; // Image fully loaded
+                      }
+                      return SizedBox(
+                        width: 100,
+                        height: 100,
+                        child: Center(
+                          child: CircularProgressIndicator(
+                            color: Colors.blue,
+                            value: loadingProgress.expectedTotalBytes != null
+                                ? loadingProgress.cumulativeBytesLoaded /
+                                    (loadingProgress.expectedTotalBytes ?? 1)
+                                : null,
+                          ),
+                        ),
+                      ); // Show loading indicator
+                    },
+                    errorBuilder: (context, error, stackTrace) => const Icon(
+                        Icons.broken_image,
+                        color: Colors.red,
+                        size: 40),
+                  )
                 : imagePath != null && File(imagePath).existsSync()
                     ? Image.file(File(imagePath),
                         width: 100, height: 100, fit: BoxFit.cover)

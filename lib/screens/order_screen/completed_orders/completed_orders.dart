@@ -15,74 +15,141 @@ class CompletedOrders extends StatefulWidget {
 }
 
 class _CompletedOrdersState extends State<CompletedOrders> {
+  bool isLoading = true;
+  List<OrderModel> allOrderList = [];
+  List<OrderModel> filteredOrderList = []; // Stores filtered data
+  String searchQuery = ""; // for searching
   Future<void> _refreshData() async {
     // Refresh the appointments
 
     // Call setState to rebuild the widget tree with updated data
-    setState(() {});
+    setState(() {
+      _fetchOrderList();
+    });
     print(
         "*******************************************************REFRESHED*******************************");
+  }
+
+  Future<void> _fetchOrderList() async {
+    setState(() {
+      isLoading = true;
+    });
+
+    try {
+      List<OrderModel> list = await Auth.completedOrderList();
+      setState(() {
+        allOrderList = list;
+        filteredOrderList = allOrderList;
+        isLoading = false;
+      });
+      print(
+          "**************************refershed filteredOrderList $filteredOrderList");
+    } catch (e) {
+      print("Error fetching maintenance list: $e");
+      setState(() {
+        isLoading = false;
+      });
+    }
+  }
+
+  void _filterOrders(String query) {
+    setState(() {
+      searchQuery = query;
+      if (query.isEmpty) {
+        filteredOrderList = allOrderList;
+      } else {
+        filteredOrderList = allOrderList
+            .where((order) =>
+                order.customerName
+                    .toLowerCase()
+                    .contains(query.toLowerCase()) ||
+                order.createdAt.toLowerCase().contains(query.toLowerCase()))
+            .toList();
+      }
+    });
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    _fetchOrderList();
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
-      body: RefreshIndicator(
+        backgroundColor: Colors.white,
+        body: RefreshIndicator(
           color: Colors.blue,
           backgroundColor: Colors.white,
           onRefresh: _refreshData,
-          child: FutureBuilder<List<OrderModel>>(
-            future: Auth.completedOrderList(),
-            builder: (context, snapshot) {
-              if (snapshot.connectionState == ConnectionState.waiting) {
-                // Show shimmer effect while fetching data
-                return ListView.builder(
-                  itemCount: 15, // Display shimmer for 6 placeholder items
-                  itemBuilder: (context, index) {
-                    return Shimmer.fromColors(
-                      baseColor: Colors.grey[300]!,
-                      highlightColor: Colors.grey[100]!,
-                      child: Container(
-                        margin: const EdgeInsets.symmetric(
-                            vertical: 5, horizontal: 12),
-                        height: 200,
-                        decoration: BoxDecoration(
-                          color: Colors.white,
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                      ),
-                    );
-                  },
-                );
-              } else if (snapshot.hasError) {
-                return const Center(child: Text("Error loading data"));
-              } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
-                return const Center(child: Text("No Data Available"));
-              }
-              final orders = snapshot.data!;
-              return ListView.builder(
-                padding: const EdgeInsets.all(10),
-                itemCount: orders.length,
-                itemBuilder: (context, index) {
-                  return GestureDetector(
-                      onTap: () {
-                        Navigator.push(
-                            context,
-                            PageTransition(
-                                type: PageTransitionType.rightToLeft,
-                                duration: const Duration(milliseconds: 200),
-                                reverseDuration:
-                                    const Duration(milliseconds: 200),
-                                child: CompletedOrderDetails(
-                                    order: orders[index])));
-                      },
-                      child: OrderCard(order: orders[index]));
-                },
-              );
-            },
-          )),
-    );
+          child: Column(
+            children: [
+              Padding(
+                padding: const EdgeInsets.only(
+                    left: 16.0, right: 16.0, top: 12.0, bottom: 5.0),
+                child: TextField(
+                  onChanged: _filterOrders,
+                  decoration: InputDecoration(
+                    labelText: "Search",
+                    floatingLabelStyle: const TextStyle(color: Colors.blue),
+                    prefixIcon: const Icon(
+                      Icons.search,
+                      color: Colors.blue,
+                    ),
+                    border: OutlineInputBorder(
+                      // Use OutlineInputBorder instead of BoxDecoration
+                      borderRadius: BorderRadius.circular(8),
+                      borderSide: const BorderSide(color: Colors.blue),
+                    ),
+                    enabledBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(8),
+                      borderSide: const BorderSide(
+                          color: Colors.blue), // Default border color
+                    ),
+                    focusedBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(8),
+                      borderSide: const BorderSide(
+                          color: Colors.blue, width: 2), // Blue when focused
+                    ),
+                  ),
+                ),
+              ),
+              Expanded(
+                child: isLoading
+                    ? const Center(
+                        child: CircularProgressIndicator(
+                        color: Colors.blue,
+                      )) // <-- Show loading spinner
+                    : filteredOrderList.isEmpty
+                        ? const Center(child: Text("No Data Available"))
+                        : ListView.builder(
+                            padding: const EdgeInsets.all(10),
+                            itemCount: filteredOrderList.length,
+                            itemBuilder: (context, index) {
+                              return GestureDetector(
+                                  onTap: () {
+                                    Navigator.push(
+                                        context,
+                                        PageTransition(
+                                            type:
+                                                PageTransitionType.rightToLeft,
+                                            duration: const Duration(
+                                                milliseconds: 200),
+                                            reverseDuration: const Duration(
+                                                milliseconds: 200),
+                                            child: CompletedOrderDetails(
+                                                order:
+                                                    filteredOrderList[index])));
+                                  },
+                                  child: OrderCard(
+                                      order: filteredOrderList[index]));
+                            },
+                          ),
+              ),
+            ],
+          ),
+        ));
   }
 }
 
