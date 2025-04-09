@@ -109,12 +109,27 @@ class OrderCard extends StatelessWidget {
                 style: const TextStyle(
                     color: Colors.blue, fontWeight: FontWeight.bold)),
             const SizedBox(height: 5),
+            // Row(
+            //   mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            //   children: [
+            //     Text(order.customerName,
+            //         style: const TextStyle(
+            //             fontSize: 16, fontWeight: FontWeight.bold)),
+            //     Text(date, style: const TextStyle(color: Colors.black)),
+            //   ],
+            // ),
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Text(order.customerName,
+                Flexible(
+                  child: Text(
+                    order.customerName,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
                     style: const TextStyle(
-                        fontSize: 16, fontWeight: FontWeight.bold)),
+                        fontSize: 16, fontWeight: FontWeight.bold),
+                  ),
+                ),
                 Text(date, style: const TextStyle(color: Colors.black)),
               ],
             ),

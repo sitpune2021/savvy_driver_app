@@ -31,12 +31,29 @@ class _OrderCardState extends State<OrderCard> {
                 style: const TextStyle(
                     color: Colors.blue, fontWeight: FontWeight.bold)),
             const SizedBox(height: 5),
+            // Row(
+            //   mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            //   children: [
+            //     Text("${widget.order.customerName}asdajkldjsh",
+            //         maxLines: 1,
+            //         overflow: TextOverflow.ellipsis,
+            //         style: const TextStyle(
+            //             fontSize: 16, fontWeight: FontWeight.bold)),
+            //     // Text(date, style: const TextStyle(color: Colors.black)),
+            //   ],
+            // ),
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Text(widget.order.customerName,
+                Flexible(
+                  child: Text(
+                    widget.order.customerName,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
                     style: const TextStyle(
-                        fontSize: 16, fontWeight: FontWeight.bold)),
+                        fontSize: 16, fontWeight: FontWeight.bold),
+                  ),
+                ),
                 Text(date, style: const TextStyle(color: Colors.black)),
               ],
             ),
