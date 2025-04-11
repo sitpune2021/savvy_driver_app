@@ -131,6 +131,8 @@ class _TrackOrderState extends State<TrackOrder> {
 
     return Scaffold(
       appBar: AppBar(
+        shadowColor: Colors.grey,
+        elevation: 5,
         iconTheme: const IconThemeData(color: Colors.white),
         backgroundColor: Colors.blue,
         title: const Text(

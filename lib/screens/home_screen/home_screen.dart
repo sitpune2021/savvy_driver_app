@@ -81,7 +81,8 @@ class _HomeScreenState extends State<HomeScreen> {
       backgroundColor: Colors.white,
       appBar: AppBar(
         backgroundColor: Colors.blue,
-        elevation: 0,
+        shadowColor: Colors.grey,
+        elevation: 5,
         title: const Text(
           "Dashboard",
           style: TextStyle(

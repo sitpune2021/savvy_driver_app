@@ -215,6 +215,8 @@ class _AllOrdersMapScreenState extends State<AllOrdersMapScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
+        shadowColor: Colors.grey,
+        elevation: 5,
         iconTheme: const IconThemeData(color: Colors.white),
         title: const Text("All Orders", style: TextStyle(color: Colors.white)),
         backgroundColor: Colors.blue,

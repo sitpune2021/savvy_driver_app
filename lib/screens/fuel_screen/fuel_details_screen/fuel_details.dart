@@ -51,9 +51,10 @@ class _FuelDetailsState extends State<FuelDetails> {
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
+        shadowColor: Colors.grey,
+        elevation: 5,
         iconTheme: const IconThemeData(color: Colors.white),
         backgroundColor: Colors.blue,
-        elevation: 0,
         title: const Text(
           "Fueling Details",
           style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),

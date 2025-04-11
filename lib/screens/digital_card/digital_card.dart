@@ -48,6 +48,8 @@ class _DigitalCardState extends State<DigitalCard> {
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
+        shadowColor: Colors.grey,
+        elevation: 5,
         iconTheme: const IconThemeData(color: Colors.white),
         title: const Text(
           "Driver Digital Card",

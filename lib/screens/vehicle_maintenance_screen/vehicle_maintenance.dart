@@ -90,7 +90,8 @@ class _VehicleMaintenanceState extends State<VehicleMaintenance> {
       backgroundColor: Colors.white,
       appBar: AppBar(
         backgroundColor: Colors.blue,
-
+        shadowColor: Colors.grey,
+        elevation: 5,
         title: const Text("Maintenance List",
             style: TextStyle(color: Colors.white)),
         // actions: [

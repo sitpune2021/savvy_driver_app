@@ -49,6 +49,8 @@ class _CompletedOrderDetailsState extends State<CompletedOrderDetails> {
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
+        shadowColor: Colors.grey,
+        elevation: 5,
         iconTheme: const IconThemeData(color: Colors.white),
         title:
             const Text("Order Details", style: TextStyle(color: Colors.white)),

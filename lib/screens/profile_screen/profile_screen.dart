@@ -55,7 +55,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
       appBar: AppBar(
         backgroundColor: const Color(0xFF1E90FF),
         title: const Text('Profile', style: TextStyle(color: Colors.white)),
-        elevation: 0,
+        shadowColor: Colors.grey,
+        elevation: 5,
       ),
       body: SingleChildScrollView(
         child: Column(

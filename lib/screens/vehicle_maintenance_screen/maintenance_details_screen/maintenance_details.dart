@@ -26,9 +26,10 @@ class _MaintenanceDetailsState extends State<MaintenanceDetails> {
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
+        shadowColor: Colors.grey,
+        elevation: 5,
         iconTheme: const IconThemeData(color: Colors.white),
         backgroundColor: Colors.blue,
-        elevation: 0,
         title: const Text(
           "Maintenance Details",
           style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
