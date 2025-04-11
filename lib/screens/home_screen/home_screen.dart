@@ -71,7 +71,7 @@ class _HomeScreenState extends State<HomeScreen> {
     // Call setState to rebuild the widget tree with updated data
     setState(() {});
     print(
-        "*******************************************************REFRESHED*******************************");
+        "******************************************************REFRESHED*******************************");
     fetchDashboardData();
   }
 
