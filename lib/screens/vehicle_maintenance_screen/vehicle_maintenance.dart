@@ -192,6 +192,7 @@ class _VehicleMaintenanceState extends State<VehicleMaintenance> {
                                             totalAmount: data.totalAmount,
                                             createdAt: data.createdAt,
                                             filepath: data.filepath,
+                                            status: data.status,
                                           )));
 
                                   if (result == true) {
@@ -204,6 +205,7 @@ class _VehicleMaintenanceState extends State<VehicleMaintenance> {
                                   maintenanceDescription:
                                       data.maintenanceDescription,
                                   totalAmount: data.totalAmount,
+                                  status: data.status,
                                 ));
                           },
                         ),
@@ -246,13 +248,15 @@ class MaintenanceCard extends StatefulWidget {
   final String maintenanceType;
   final String maintenanceDescription;
   final String totalAmount;
+  final String status;
 
   const MaintenanceCard(
       {super.key,
       required this.vehicleNo,
       required this.maintenanceType,
       required this.maintenanceDescription,
-      required this.totalAmount});
+      required this.totalAmount,
+      required this.status});
 
   @override
   State<MaintenanceCard> createState() => _MaintenanceCardState();
@@ -261,6 +265,7 @@ class MaintenanceCard extends StatefulWidget {
 class _MaintenanceCardState extends State<MaintenanceCard> {
   @override
   Widget build(BuildContext context) {
+    print("***************************88ststus${widget.status}");
     return Card(
       color: Colors.white,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
@@ -272,7 +277,7 @@ class _MaintenanceCardState extends State<MaintenanceCard> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             _buildTextRow("Vehicle Number", widget.vehicleNo),
-            _buildTextRow("Maintenance Type", widget.maintenanceType),
+            // _buildTextRow("Maintenance Type", widget.maintenanceType),
             _buildTextRow("Description", widget.maintenanceDescription),
             const SizedBox(height: 8),
             const Text("Bill",
@@ -301,8 +306,10 @@ class _MaintenanceCardState extends State<MaintenanceCard> {
                   children: [
                     _buildTextRow("Total", widget.totalAmount,
                         valueColor: Colors.blue),
-                    _buildTextRow("Status", "Approved",
-                        valueColor: Colors.green),
+                    _buildTextRow("Status", widget.status,
+                        valueColor: widget.status == "pending"
+                            ? Colors.orange
+                            : Colors.green),
                   ],
                 ),
               ],

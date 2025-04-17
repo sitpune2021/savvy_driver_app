@@ -146,7 +146,7 @@ class _FuelScreenState extends State<FuelScreen> {
                         PageTransition(
                           type: PageTransitionType.rightToLeft,
                           child: FuelDetails(
-                            date: item.date,
+                            date: item.createdAt,
                             vehicleNo: item.vehicleNo,
                             totalFuel: item.totalFuel,
                             price: item.price,
@@ -176,7 +176,7 @@ class _FuelScreenState extends State<FuelScreen> {
                               const Icon(Icons.local_gas_station,
                                   color: Colors.blue),
                               const SizedBox(width: 5),
-                              Text(item.totalFuel,
+                              Text("${item.totalFuel}ltrs",
                                   style: const TextStyle(
                                       color: Colors.blue,
                                       fontWeight: FontWeight.w500)),

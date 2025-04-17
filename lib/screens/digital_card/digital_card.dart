@@ -69,6 +69,7 @@ class _DigitalCardState extends State<DigitalCard> {
                     columns: const [
                       DataColumn(label: Text("Sr. No")),
                       DataColumn(label: Text("Date")),
+                      DataColumn(label: Text("Customer Name")),
                       DataColumn(label: Text("No of full \nDelivered Jars")),
                       DataColumn(label: Text("No of \nempty Jars")),
                       // DataColumn(label: Text("Action")),
@@ -77,6 +78,7 @@ class _DigitalCardState extends State<DigitalCard> {
                         ? [
                             const DataRow(cells: [
                               DataCell(Text("No data available")),
+                              DataCell(Text("-")),
                               DataCell(Text("-")),
                               DataCell(Text("-")),
                               DataCell(Text("-")),
@@ -91,6 +93,7 @@ class _DigitalCardState extends State<DigitalCard> {
                               DataCell(Text(index.toString())),
                               DataCell(Text(DateFormat("dd-MM-yyyy")
                                   .format(item.createdAt))),
+                              DataCell(Text(item.customerName)),
                               DataCell(Text(item.deliverQty)),
                               DataCell(Text(item.returnQty)),
                               // DataCell(IconButton(

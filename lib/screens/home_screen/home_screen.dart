@@ -22,6 +22,8 @@ class _HomeScreenState extends State<HomeScreen> {
   int todaysOrder = 0;
   int todaysPending = 0;
   int todaysCompleted = 0;
+  int totalDeliveryCount = 0;
+  int totalDeliveredCount = 0;
   bool isLoading = true;
 
   @override
@@ -34,25 +36,32 @@ class _HomeScreenState extends State<HomeScreen> {
     try {
       SharedPreferences prefs = await SharedPreferences.getInstance();
       String? driverId = prefs.getString("userid");
+      String? token = prefs.getString("token");
+      if (kDebugMode) {
+        print("--------------------------token: $token");
+      }
       if (kDebugMode) {
         print("--------------------------driverid: $driverId");
       }
-      final response = await http.post(
-        Uri.parse(Constant.orderStatistics),
-        headers: <String, String>{'Content-Type': 'application/json'},
-        body: jsonEncode(<String, dynamic>{
-          "driver_id": driverId,
-        }),
+      final response = await http.get(
+        Uri.parse(
+            "${Constant.orderStatistics}order?driver_id=$driverId&count=true"),
+        headers: <String, String>{
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer $token',
+        },
       );
 
       if (response.statusCode == 200 || response.statusCode == 201) {
         final data = jsonDecode(response.body);
         print("--------------------------dashboard statistics $data");
-        if (data['status'] == "success") {
+        if (data['status'] == true) {
           setState(() {
-            todaysOrder = data['todays_order'];
-            todaysPending = data['todays_pending'];
-            todaysCompleted = data['todays_completed'];
+            todaysOrder = data['data']['todays_orders'];
+            todaysPending = data['data']['todays_pending_orders'];
+            todaysCompleted = data['data']['todays_completed_orders'];
+            totalDeliveryCount = data['data']['total_delivery_count'];
+            totalDeliveredCount = data['data']['total_deliverd_count'];
             isLoading = false;
           });
         }
@@ -83,11 +92,21 @@ class _HomeScreenState extends State<HomeScreen> {
         backgroundColor: Colors.blue,
         shadowColor: Colors.grey,
         elevation: 5,
+        iconTheme: const IconThemeData(color: Colors.white),
         title: const Text(
           "Dashboard",
           style: TextStyle(
               fontSize: 20, fontWeight: FontWeight.w500, color: Colors.white),
         ),
+        actions: <Widget>[
+          IconButton(
+            icon: const Icon(Icons.refresh),
+            tooltip: 'Refresh Data',
+            onPressed: () {
+              _refreshData();
+            },
+          ),
+        ],
         centerTitle: false,
       ),
       body: RefreshIndicator(
@@ -107,7 +126,37 @@ class _HomeScreenState extends State<HomeScreen> {
                     color: Colors.black),
               ),
               isLoading ? _buildLoadingIndicator() : _buildStatisticsGrid(),
-              const SizedBox(height: 20),
+              const SizedBox(height: 10),
+              Card(
+                color: const Color.fromARGB(255, 208, 230, 249),
+                shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(10)),
+                child: Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      const Text(
+                        "Total bottles",
+                        style: TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.blue),
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        "$totalDeliveredCount/$totalDeliveryCount",
+                        textAlign: TextAlign.center,
+                        style: const TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.w500,
+                            color: Colors.black),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+              const SizedBox(height: 10),
               _buildOrderSection(context, "New Orders Request"),
               Expanded(
                 child: FutureBuilder<List<OrderModel>>(
@@ -115,7 +164,10 @@ class _HomeScreenState extends State<HomeScreen> {
                   builder: (context, snapshot) {
                     if (snapshot.connectionState == ConnectionState.waiting) {
                       // Show shimmer effect while fetching data
-                      return Center(child: CircularProgressIndicator());
+                      return const Center(
+                          child: CircularProgressIndicator(
+                        color: Colors.blue,
+                      ));
                     } else if (snapshot.hasError) {
                       return const Center(child: Text("Error loading data"));
                     } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
@@ -126,17 +178,17 @@ class _HomeScreenState extends State<HomeScreen> {
                       ));
                     }
                     final orders = snapshot.data!;
-                    List<OrderModel> order = [];
+                    // List<OrderModel> order = [];
 
-                    int length = orders.length;
-                    order.add(orders[length - 1]);
+                    // int length = orders.length;
+                    // order.add(orders[length - 1]);
 
-                    print(
-                        "--------------------------dashboard last order list $order");
+                    // print(
+                    //     "--------------------------dashboard last order list $order");
 
                     return ListView.builder(
                       padding: const EdgeInsets.all(0),
-                      itemCount: order.length,
+                      itemCount: orders.length,
                       itemBuilder: (context, index) {
                         return GestureDetector(
                             onTap: () {
@@ -212,7 +264,9 @@ class _HomeScreenState extends State<HomeScreen> {
     return const Center(
       child: Padding(
         padding: EdgeInsets.all(20),
-        child: CircularProgressIndicator(),
+        child: CircularProgressIndicator(
+          color: Colors.blue,
+        ),
       ),
     );
   }

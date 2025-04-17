@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 
 class FuelDetails extends StatefulWidget {
   final String date;
@@ -31,7 +32,9 @@ class _FuelDetailsState extends State<FuelDetails> {
   @override
   void initState() {
     super.initState();
-    _dateController = TextEditingController(text: widget.date);
+    DateTime orderDate = DateFormat("yyyy-MM-dd").parse(widget.date);
+    String date = "${orderDate.day}-${orderDate.month}-${orderDate.year}";
+    _dateController = TextEditingController(text: date);
     _vehicleNumberController = TextEditingController(text: widget.vehicleNo);
     _fuelController = TextEditingController(text: widget.totalFuel);
     _priceController = TextEditingController(text: widget.price);

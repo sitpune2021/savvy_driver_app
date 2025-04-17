@@ -5,7 +5,7 @@ class FuelModel {
   final String vehicleNo;
   final String price;
   final String totalFuel;
-  final String isDeleted;
+  // final String isDeleted;
   final String createdAt;
   final String filepath1;
   final String filepath2;
@@ -17,7 +17,7 @@ class FuelModel {
     required this.vehicleNo,
     required this.price,
     required this.totalFuel,
-    required this.isDeleted,
+    // required this.isDeleted,
     required this.createdAt,
     required this.filepath1,
     required this.filepath2,
@@ -26,16 +26,16 @@ class FuelModel {
   // Factory method to create a FuelModel from a JSON map
   factory FuelModel.fromJson(Map<String, dynamic> json) {
     return FuelModel(
-      id: json['id'] ?? '',
-      driverId: json['driver_id'] ?? '',
+      id: json['id'].toString() ?? '',
+      driverId: json['driver_id'].toString() ?? '',
       date: json['date'] ?? '',
-      vehicleNo: json['vehical_no'] ?? '',
-      price: json['price'] ?? '',
-      totalFuel: json['total_fule'] ?? '',
-      isDeleted: json['isdeleted'] ?? '',
-      createdAt: json['created_at'] ?? '',
-      filepath1: json['filepath1'] ?? '',
-      filepath2: json['filepath2'] ?? '',
+      vehicleNo: json['vehicle_no'].toString() ?? '',
+      price: json['amount'].toString() ?? '',
+      totalFuel: json['description'].toString() ?? '',
+      // isDeleted: json['isdeleted'] ?? '',
+      createdAt: json['created_at'].toString() ?? '',
+      filepath1: json['filepath1'].toString() ?? '',
+      filepath2: json['filepath2'].toString() ?? '',
     );
   }
 
@@ -45,10 +45,10 @@ class FuelModel {
       'id': id,
       'driver_id': driverId,
       'date': date,
-      'vehical_no': vehicleNo,
-      'price': price,
+      'vehicle_no': vehicleNo,
+      'amount': price,
       'total_fule': totalFuel,
-      'isdeleted': isDeleted,
+      // 'isdeleted': isDeleted,
       'created_at': createdAt,
       'filepath1': filepath1,
       'filepath2': filepath2,
@@ -57,6 +57,6 @@ class FuelModel {
 
   @override
   String toString() {
-    return 'FuelModel(id: $id, driverId: $driverId, date: $date, vehicleNo: $vehicleNo, price: $price, totalFuel: $totalFuel, isDeleted: $isDeleted, createdAt: $createdAt filepath2: $filepath2,filepath1: $filepath1)';
+    return 'FuelModel(id: $id, driverId: $driverId, date: $date, vehicleNo: $vehicleNo, price: $price, totalFuel: $totalFuel, createdAt: $createdAt filepath2: $filepath2,filepath1: $filepath1)';
   }
 }

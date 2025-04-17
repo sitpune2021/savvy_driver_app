@@ -10,8 +10,10 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 class OrderConfirmation extends StatefulWidget {
   final String orderId;
+  final String customerId;
 
-  const OrderConfirmation({super.key, required this.orderId});
+  const OrderConfirmation(
+      {super.key, required this.orderId, required this.customerId});
 
   @override
   _OrderConfirmationState createState() => _OrderConfirmationState();
@@ -37,8 +39,13 @@ class _OrderConfirmationState extends State<OrderConfirmation> {
       );
       return;
     } else {
-      bool result = await Auth.orderConfirmation(widget.orderId, returnedItem,
-          deliveredItem, deliveredImage, returnedImage);
+      bool result = await Auth.orderConfirmation(
+          widget.customerId,
+          widget.orderId,
+          deliveredItem,
+          returnedItem,
+          deliveredImage,
+          returnedImage);
       if (result) {
         _returnedItem.clear();
         _deliveredItem.clear();

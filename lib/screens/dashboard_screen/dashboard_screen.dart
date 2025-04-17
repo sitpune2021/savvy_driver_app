@@ -24,7 +24,6 @@ class _DashboardScreenState extends State<DashboardScreen> {
 
   List<dynamic> get _screens => [
         const HomeScreen(),
-        // const AppointmentScreen(i: 0),
         OrderScreen(),
         VehicleMaintenance(),
         ProfileScreen()
@@ -115,11 +114,6 @@ class CustomBottomNavBar extends StatelessWidget {
               label: "Home",
               index: 0,
             ),
-            // _buildNavItem(
-            //   icon: Icons.laptop,
-            //   label: "Appointment",
-            //   index: 1,
-            // ),
             _buildNavItem(
               icon: Icons.add_task_sharp,
               label: "Orders",

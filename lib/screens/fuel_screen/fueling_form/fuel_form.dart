@@ -102,11 +102,13 @@ class _FuelFormState extends State<FuelForm> {
 
   void _submitForm() async {
     if (selectedDate == null ||
-        _vehicleNumberController.text.isEmpty ||
-        _fuelAmountController.text.isEmpty ||
-        _priceController.text.isEmpty ||
-        meterPhoto == null ||
-        receiptPhoto == null) {
+            // _vehicleNumberController.text.isEmpty ||
+            _fuelAmountController.text.isEmpty ||
+            _priceController.text.isEmpty
+        // ||
+        // meterPhoto == null ||
+        // receiptPhoto == null
+        ) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
             content: Text('Please fill all fields and upload images')),
@@ -115,7 +117,7 @@ class _FuelFormState extends State<FuelForm> {
     } else {
       bool result = await Auth.addFuel(
           selectedDate2.toString(),
-          _vehicleNumberController.text.trim(),
+          // _vehicleNumberController.text.trim(),
           _priceController.text.trim(),
           _fuelAmountController.text.trim(),
           meterPhoto,
@@ -193,18 +195,18 @@ class _FuelFormState extends State<FuelForm> {
                   _buildDateField("Enter Date"),
                 ],
               )),
-              const SizedBox(width: 10),
-              Expanded(
-                  child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  _buildLabel("Vehicle Number"),
-                  _buildTextField(_vehicleNumberController, "Vehicle Number"),
-                ],
-              )),
+              // const SizedBox(width: 10),
+              // Expanded(
+              //     child: Column(
+              //   crossAxisAlignment: CrossAxisAlignment.start,
+              //   children: [
+              //     _buildLabel("Vehicle Number"),
+              //     _buildTextField(_vehicleNumberController, "Vehicle Number"),
+              //   ],
+              // )),
             ],
           ),
-          const SizedBox(height: 10),
+          const SizedBox(height: 5),
           Row(
             children: [
               Expanded(

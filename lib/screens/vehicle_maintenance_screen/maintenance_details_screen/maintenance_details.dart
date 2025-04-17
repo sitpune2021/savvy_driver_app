@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 
 class MaintenanceDetails extends StatefulWidget {
   final String vehicleNo;
@@ -7,6 +8,7 @@ class MaintenanceDetails extends StatefulWidget {
   final String totalAmount;
   final String createdAt;
   final String filepath;
+  final String status;
   const MaintenanceDetails(
       {super.key,
       required this.vehicleNo,
@@ -14,7 +16,8 @@ class MaintenanceDetails extends StatefulWidget {
       required this.maintenanceDescription,
       required this.totalAmount,
       required this.createdAt,
-      required this.filepath});
+      required this.filepath,
+      required this.status});
 
   @override
   State<MaintenanceDetails> createState() => _MaintenanceDetailsState();
@@ -23,6 +26,8 @@ class MaintenanceDetails extends StatefulWidget {
 class _MaintenanceDetailsState extends State<MaintenanceDetails> {
   @override
   Widget build(BuildContext context) {
+    DateTime orderDate = DateFormat("yyyy-MM-dd").parse(widget.createdAt);
+    String date = "${orderDate.day}-${orderDate.month}-${orderDate.year}";
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
@@ -55,9 +60,9 @@ class _MaintenanceDetailsState extends State<MaintenanceDetails> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 _buildDetailText("Vehicle Number", widget.vehicleNo),
-                _buildDetailText("Maintenance Type", widget.maintenanceType),
-                _buildDetailText("Date", widget.createdAt),
-                const SizedBox(height: 10),
+                // _buildDetailText("Maintenance Type", widget.maintenanceType),
+                _buildDetailText("Date", date),
+                const SizedBox(height: 0),
                 const Text(
                   "Description",
                   style: TextStyle(fontWeight: FontWeight.bold),
@@ -72,7 +77,7 @@ class _MaintenanceDetailsState extends State<MaintenanceDetails> {
                 const SizedBox(height: 10),
                 _buildBillSection(),
                 const SizedBox(height: 20),
-                _buildStatus(),
+                _buildStatus(widget.status),
               ],
             ),
           ),
@@ -243,17 +248,21 @@ class _MaintenanceDetailsState extends State<MaintenanceDetails> {
     );
   }
 
-  Widget _buildStatus() {
-    return const Row(
+  Widget _buildStatus(String status) {
+    return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        Text(
+        const Text(
           "Status",
           style: TextStyle(fontWeight: FontWeight.bold),
         ),
         Text(
-          "Approved",
-          style: TextStyle(color: Colors.green, fontWeight: FontWeight.bold),
+          status,
+          style: status == "pending"
+              ? const TextStyle(
+                  color: Colors.orange, fontWeight: FontWeight.bold)
+              : const TextStyle(
+                  color: Colors.green, fontWeight: FontWeight.bold),
         ),
       ],
     );

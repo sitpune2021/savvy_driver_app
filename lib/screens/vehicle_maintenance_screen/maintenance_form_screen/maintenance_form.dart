@@ -21,13 +21,29 @@ class _MaintenanceFormState extends State<MaintenanceForm> {
   final TextEditingController _totalAmountController = TextEditingController();
 
   File? _billImage;
-
+  DateTime? selectedDate;
+  String? selectedDate2;
   Future<void> _pickImage() async {
     final pickedFile =
         await ImagePicker().pickImage(source: ImageSource.gallery);
     if (pickedFile != null) {
       setState(() {
         _billImage = File(pickedFile.path);
+      });
+    }
+  }
+
+  Future<void> _pickDate() async {
+    final DateTime? picked = await showDatePicker(
+      context: context,
+      initialDate: DateTime.now(),
+      firstDate: DateTime(2020),
+      lastDate: DateTime(2030),
+    );
+    if (picked != null) {
+      setState(() {
+        selectedDate = picked;
+        selectedDate2 = "${picked.day}-${picked.month}-${picked.year}";
       });
     }
   }
@@ -73,22 +89,19 @@ class _MaintenanceFormState extends State<MaintenanceForm> {
   }
 
   void _submitForm() async {
-    String vehicleNumber = _vehicleNumberController.text.trim();
-    String maintenanceType = _maintenanceTypeController.text.trim();
+    // String vehicleNumber = _vehicleNumberController.text.trim();
+    // String maintenanceType = _maintenanceTypeController.text.trim();
     String description = _descriptionController.text.trim();
     String totalAmount = _totalAmountController.text.trim();
 
-    if (vehicleNumber.isEmpty ||
-        maintenanceType.isEmpty ||
-        description.isEmpty ||
-        totalAmount.isEmpty) {
+    if (description.isEmpty || totalAmount.isEmpty || selectedDate2 == null) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Please fill all fields')),
       );
       return;
     } else {
       bool result = await Auth.addMaintenance(
-          vehicleNumber, maintenanceType, description, totalAmount, _billImage);
+          description, totalAmount, _billImage, selectedDate2!);
 
       if (result) {
         _vehicleNumberController.clear();
@@ -135,10 +148,10 @@ class _MaintenanceFormState extends State<MaintenanceForm> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  _buildLabel("Vehicle Number"),
-                  _buildTextField(_vehicleNumberController, "Enter Number"),
-                  _buildLabel("Maintenance Type"),
-                  _buildTextField(_maintenanceTypeController, "Enter Type"),
+                  _buildLabel("Enter Date"),
+                  _buildDateField("Enter Date"),
+                  // _buildLabel("Maintenance Type"),
+                  // _buildTextField(_maintenanceTypeController, "Enter Type"),
                   _buildLabel("Description"),
                   _buildTextField(_descriptionController, "Enter Description"),
                   _buildLabel("Total Amount"),
@@ -246,9 +259,49 @@ class _MaintenanceFormState extends State<MaintenanceForm> {
       controller: controller,
       decoration: InputDecoration(
         hintText: hintText,
-        border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
+        border: OutlineInputBorder(
+          // Use OutlineInputBorder instead of BoxDecoration
+          borderRadius: BorderRadius.circular(8),
+          borderSide: const BorderSide(color: Colors.blue),
+        ),
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(8),
+          borderSide:
+              const BorderSide(color: Colors.blue), // Default border color
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(8),
+          borderSide: const BorderSide(
+              color: Colors.blue, width: 2), // Blue when focused
+        ),
         contentPadding:
             const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+      ),
+    );
+  }
+
+  Widget _buildDateField(String label) {
+    return GestureDetector(
+      onTap: _pickDate,
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 14),
+        decoration: BoxDecoration(
+          border: Border.all(color: Colors.blue),
+          borderRadius: BorderRadius.circular(8),
+        ),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Text(
+              selectedDate == null
+                  ? "DD/MM/YY"
+                  : "${selectedDate!.day}/${selectedDate!.month}/${selectedDate!.year}",
+              style: TextStyle(
+                  color: selectedDate == null ? Colors.grey : Colors.black),
+            ),
+            const Icon(Icons.calendar_today, color: Colors.blue, size: 18),
+          ],
+        ),
       ),
     );
   }

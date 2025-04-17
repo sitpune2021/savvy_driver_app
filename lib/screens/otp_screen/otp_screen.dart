@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:pin_code_fields/pin_code_fields.dart';
 import 'package:savvy_aqua_delivery/constants/color_constants.dart';
@@ -15,13 +17,40 @@ class OtpScreen extends StatefulWidget {
 class _OtpScreenState extends State<OtpScreen> {
   bool resetOtp = false;
   late TextEditingController otpController;
-
+  bool isButtonEnabled = true;
+  int remainingSeconds = 0;
+  Timer? _timer;
   @override
   void initState() {
     super.initState();
     otpController = TextEditingController();
   }
 
+  void startTimer() {
+    setState(() {
+      isButtonEnabled = false;
+      remainingSeconds = 30;
+    });
+
+    _timer = Timer.periodic(const Duration(seconds: 1), (timer) {
+      if (remainingSeconds == 0) {
+        timer.cancel();
+        setState(() {
+          isButtonEnabled = true;
+        });
+      } else {
+        setState(() {
+          remainingSeconds--;
+        });
+      }
+    });
+  }
+
+  @override
+  void dispose() {
+    _timer?.cancel(); // Clean up the timer when the widget is disposed
+    super.dispose();
+  }
   // @override
   // void dispose() {
   //   otpController.dispose(); // Dispose only when the widget is destroyed
@@ -112,9 +141,9 @@ class _OtpScreenState extends State<OtpScreen> {
                             if (resetOtp == false) {
                               SharedPreferences prefs =
                                   await SharedPreferences.getInstance();
-                              final otp = prefs.getString("otp");
-
-                              if (otp == v) {
+                              // final phone = prefs.getString("loginPhoneNo");
+                              final result = await Auth.verifyOtp(v);
+                              if (result) {
                                 otpController.clear();
                                 prefs.setBool("isLoggedIn", true);
                                 ScaffoldMessenger.of(context).showSnackBar(
@@ -139,16 +168,17 @@ class _OtpScreenState extends State<OtpScreen> {
                               SharedPreferences prefs =
                                   await SharedPreferences.getInstance();
 
-                              // final phone = prefs.getString("phone");
+                              // final phone = prefs.getString("loginPhoneNo");
 
                               // bool result = await Auth.login(phone!);
+                              final result = await Auth.verifyOtp(v);
 
-                              // print(
-                              //     "--------------------------------------login result: $result");
+                              print(
+                                  "--------------------------------------login result: $result");
 
-                              // if (result) {
-                              final otp = prefs.getString("otp");
-                              if (otp == v) {
+                              if (result) {
+                                // final otp = prefs.getString("otp");
+                                // if (otp == v) {
                                 otpController.clear();
                                 prefs.setBool("isLoggedIn", true);
                                 ScaffoldMessenger.of(context).showSnackBar(
@@ -165,22 +195,22 @@ class _OtpScreenState extends State<OtpScreen> {
                                 setState(() {
                                   resetOtp = false;
                                 });
+                                // } else {
+                                //   otpController.clear();
+                                //   ScaffoldMessenger.of(context).showSnackBar(
+                                //       const SnackBar(
+                                //           content: Text(
+                                //               "Incorrect OTP! Please enter a valid OTP")));
+                                //   setState(() {
+                                //     resetOtp = false;
+                                //   });
+                                // }
                               } else {
-                                otpController.clear();
                                 ScaffoldMessenger.of(context).showSnackBar(
                                     const SnackBar(
                                         content: Text(
-                                            "Incorrect OTP! Please enter a valid OTP")));
-                                setState(() {
-                                  resetOtp = false;
-                                });
+                                            "Something went wrong please check internet connection")));
                               }
-                              // } else {
-                              //   ScaffoldMessenger.of(context).showSnackBar(
-                              //       const SnackBar(
-                              //           content: Text(
-                              //               "Something went wrong please check internet connection")));
-                              // }
                             }
                           },
                         ),
@@ -191,25 +221,35 @@ class _OtpScreenState extends State<OtpScreen> {
                           children: [
                             const Text("Didn’t receive the code?"),
                             TextButton(
-                              onPressed: () async {
-                                setState(() {
-                                  resetOtp = true;
-                                });
-                                SharedPreferences prefs =
-                                    await SharedPreferences.getInstance();
+                              onPressed: isButtonEnabled
+                                  ? () async {
+                                      setState(() {
+                                        // Reset or any flag logic here
+                                      });
 
-                                final phone = prefs.getString("phone");
+                                      // Start the timer
+                                      startTimer();
 
-                                bool result = await Auth.login(phone!);
+                                      // Call the API to resend OTP
+                                      SharedPreferences prefs =
+                                          await SharedPreferences.getInstance();
+                                      final phone =
+                                          prefs.getString("loginPhoneNo");
 
-                                print(
-                                    "--------------------------------------login result: $result");
-                              },
-                              child: const Text("Send Again",
-                                  style: TextStyle(color: Colors.blue)),
+                                      bool result = await Auth.login(phone!);
+                                      print(
+                                          "--------------------------------------login result: $result");
+                                    }
+                                  : null, // Disable button
+                              child: Text(
+                                isButtonEnabled
+                                    ? "Send Again"
+                                    : "Wait ${remainingSeconds}s",
+                                style: TextStyle(color: Colors.blue),
+                              ),
                             ),
                           ],
-                        ),
+                        )
                       ],
                     ),
                   ),

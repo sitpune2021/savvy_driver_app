@@ -189,7 +189,7 @@ class _TrackOrderState extends State<TrackOrder> {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text(widget.order.orderId,
+                          Text("Order ID: ${widget.order.orderId}",
                               style: const TextStyle(
                                   color: Colors.blue,
                                   fontWeight: FontWeight.bold)),
@@ -256,6 +256,7 @@ class _TrackOrderState extends State<TrackOrder> {
                               type: PageTransitionType.rightToLeft,
                               child: OrderConfirmation(
                                 orderId: widget.order.orderId,
+                                customerId: widget.order.customerId,
                               )));
                     },
                     style: ElevatedButton.styleFrom(

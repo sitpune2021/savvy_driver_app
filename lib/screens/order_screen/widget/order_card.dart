@@ -27,7 +27,7 @@ class _OrderCardState extends State<OrderCard> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(widget.order.orderId,
+            Text("Order ID: ${widget.order.orderId}",
                 style: const TextStyle(
                     color: Colors.blue, fontWeight: FontWeight.bold)),
             const SizedBox(height: 5),

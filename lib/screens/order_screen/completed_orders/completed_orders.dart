@@ -172,7 +172,7 @@ class OrderCard extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(order.orderId,
+            Text("Order ID: ${order.orderId}",
                 style: const TextStyle(
                     color: Colors.blue, fontWeight: FontWeight.bold)),
             const SizedBox(height: 5),

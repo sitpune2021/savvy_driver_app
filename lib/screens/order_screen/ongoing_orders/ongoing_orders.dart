@@ -6,7 +6,6 @@ import 'package:savvy_aqua_delivery/screens/all_orders_map_screen/all_orders_map
 import 'package:savvy_aqua_delivery/screens/order_screen/widget/order_card.dart';
 import 'package:savvy_aqua_delivery/screens/track_order_screen/track_order.dart';
 import 'package:savvy_aqua_delivery/services/auth.dart';
-import 'package:shimmer/shimmer.dart';
 
 class OngoingOrders extends StatefulWidget {
   const OngoingOrders({super.key});

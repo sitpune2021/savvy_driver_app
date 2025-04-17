@@ -3,6 +3,7 @@ import 'dart:io';
 
 import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
+import 'package:http_parser/http_parser.dart';
 import 'package:savvy_aqua_delivery/constants/constant.dart';
 import 'package:savvy_aqua_delivery/model/digital_card_model.dart';
 import 'package:savvy_aqua_delivery/model/fuel_model.dart';
@@ -18,7 +19,7 @@ class Auth {
         Uri.parse(Constant.login),
         headers: <String, String>{'Content-Type': 'application/json'},
         body: jsonEncode(<String, dynamic>{
-          'mobile_no': mobileno,
+          'phone_no': mobileno,
         }),
       );
       if (kDebugMode) {
@@ -33,19 +34,22 @@ class Auth {
           print("jsonresponse: $jsonresponse");
         }
 
-        if (jsonresponse['status'] == "success") {
-          UserModel user = UserModel.fromJson(jsonresponse['details']);
+        if (jsonresponse['status'] == true) {
+          String phoneno = jsonresponse["data"]["phone_no"];
+          // UserModel user = UserModel.fromJson(jsonresponse['details']);
           SharedPreferences prefs = await SharedPreferences.getInstance();
-          prefs.setString("userid", user.userId);
-          prefs.setString("otp", user.otp);
-          prefs.setString("name", user.name);
-          prefs.setString("email", user.username);
-          prefs.setString("phone", user.phone);
-          final otp = prefs.getString("otp");
-          print("-------------------- Auth model otp ${user.otp}");
-          print("-------------------- Auth local storage otp ${otp}");
+          // prefs.setString("userid", user.userId);
+          // prefs.setString("otp", user.otp);
+          // prefs.setString("name", user.name);
+          // prefs.setString("email", user.username);
+          prefs.setString("loginPhoneNo", phoneno);
+          // final otp = prefs.getString("otp");
+          // print("-------------------- Auth model otp ${user.otp}");
+          // print("-------------------- Auth local storage otp ${otp}");
           if (kDebugMode) {
-            print("-------------------- User details: ${user.name}");
+            // print("-------------------- User details: ${user.name}");
+            print(
+                "-------------------- User details:not found here:- true$phoneno");
           }
           return true;
         }
@@ -59,9 +63,58 @@ class Auth {
     return false;
   }
 
+  static Future<bool> verifyOtp(String otp) async {
+    try {
+      SharedPreferences prefs = await SharedPreferences.getInstance();
+      final mobileno = prefs.getString("loginPhoneNo");
+      final response = await http.post(
+        Uri.parse(Constant.verifyOtp),
+        headers: <String, String>{'Content-Type': 'application/json'},
+        body: jsonEncode(<String, dynamic>{'phone_no': mobileno, "otp": otp}),
+      );
+      if (kDebugMode) {
+        print("Constant.verfiyOtp ${Constant.verifyOtp}");
+        print("verifyOtp response:${response.body}");
+        // return true;
+      }
+
+      if (response.statusCode == 200 || response.statusCode == 201) {
+        final jsonresponse = jsonDecode(response.body);
+        if (kDebugMode) {
+          print("jsonresponse: $jsonresponse");
+        }
+
+        if (jsonresponse['status'] == true) {
+          String token = jsonresponse["data"]["token"].toString();
+          UserModel user = UserModel.fromJson(jsonresponse['data']["driver"]);
+          SharedPreferences prefs = await SharedPreferences.getInstance();
+          prefs.setString("userid", user.userId);
+          prefs.setString("token", token);
+          prefs.setString("name", user.name);
+          prefs.setString("email", user.username);
+          prefs.setString("phone", user.phone);
+          final otp = prefs.getString("name");
+          print("-------------------- Auth model otp ${user.name}");
+          print("-------------------- Auth local storage otp ${otp}");
+          if (kDebugMode) {
+            print("-------------------- User details: ${user.name}");
+            print("-------------------- User details:not found here:- true");
+          }
+          return true;
+        }
+      }
+    } catch (e) {
+      if (kDebugMode) {
+        print("otp Error $e");
+      }
+      return false;
+    }
+    return false;
+  }
+
   static Future<bool> addFuel(
     String date,
-    String vehicleNo,
+    // String vehicleNo,
     String price,
     String totalFuel,
     File? meterPhoto,
@@ -70,19 +123,24 @@ class Auth {
     try {
       SharedPreferences prefs = await SharedPreferences.getInstance();
       String? driverId = prefs.getString("userid");
-
+      String? token = prefs.getString("token");
+      if (kDebugMode) {
+        print("--------------------------token: $token");
+      }
       if (kDebugMode) {
         print("--------------------------driverid: $driverId");
       }
 
       var request = http.MultipartRequest("POST", Uri.parse(Constant.addFuel));
-
+      request.headers.addAll({
+        'Authorization': 'Bearer $token',
+      });
       // Add form fields
       request.fields['driver_id'] = driverId ?? "";
       request.fields['date'] = date;
-      request.fields['vehical_no'] = vehicleNo;
-      request.fields['price'] = price;
-      request.fields['total_fule'] = totalFuel;
+      request.fields['type'] = "fuel";
+      request.fields['amount'] = price;
+      request.fields['description'] = totalFuel;
 
       // Attach images if available
       if (meterPhoto != null) {
@@ -115,7 +173,7 @@ class Auth {
           print("jsonresponse: $jsonresponse");
         }
 
-        if (jsonresponse['status'] == "success") {
+        if (jsonresponse['status'] == true) {
           return true;
         }
       }
@@ -132,15 +190,23 @@ class Auth {
     try {
       SharedPreferences prefs = await SharedPreferences.getInstance();
       String? driverId = prefs.getString("userid");
+      String? token = prefs.getString("token");
+      if (kDebugMode) {
+        print("--------------------------token: $token");
+      }
       if (kDebugMode) {
         print("--------------------------driverid: $driverId");
       }
-      final response = await http.post(
-        Uri.parse(Constant.viewFuel),
-        headers: <String, String>{'Content-Type': 'application/json'},
-        body: jsonEncode(<String, dynamic>{
-          "driver_id": driverId,
-        }),
+      final response = await http.get(
+        Uri.parse(
+            "${Constant.viewFuel}maintenance?driver_id=$driverId&type=fuel"),
+        headers: <String, String>{
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer $token',
+        },
+        // body: jsonEncode(<String, dynamic>{
+        //   "driver_id": driverId,
+        // }),
       );
       if (kDebugMode) {
         print("Constant.addFuel ${Constant.viewFuel}");
@@ -154,8 +220,8 @@ class Auth {
           print("jsonresponse: $jsonresponse");
         }
 
-        if (jsonresponse['status'] == "success") {
-          List<dynamic> responseList = jsonresponse["details"];
+        if (jsonresponse['status'] == true) {
+          List<dynamic> responseList = jsonresponse["data"];
           print(
               "-------------------------responseList:${responseList.toString()}");
 
@@ -225,32 +291,42 @@ class Auth {
   // }
 
   static Future<bool> addMaintenance(
-    // String date,
-    String vehicleNo,
-    String maintenanceType,
-    String maintenanceDesciption,
-    String price,
-    File? imageFile,
-  ) async {
+      // String date,
+      // String vehicleNo,
+      // String maintenanceType,
+      String maintenanceDesciption,
+      String price,
+      File? imageFile,
+      String date) async {
     try {
       SharedPreferences prefs = await SharedPreferences.getInstance();
       String? driverId = prefs.getString("userid");
       if (kDebugMode) {
         print("--------------------------driverid: $driverId");
       }
+      String? token = prefs.getString("token");
+      if (kDebugMode) {
+        print("--------------------------token: $token");
+      }
       var request =
           http.MultipartRequest("POST", Uri.parse(Constant.storeMaintenance));
       // Add text fields
+      request.headers.addAll({
+        'Authorization': 'Bearer $token',
+        'Content-Type':
+            'multipart/form-data', // i have to check using this if image is uploading or not
+      });
       request.fields['driver_id'] = driverId ?? "";
-      request.fields['vehical_no'] = vehicleNo;
-      request.fields['maintenance_type'] = maintenanceType;
-      request.fields['maintenance_desciption'] = maintenanceDesciption;
-      request.fields['total_amount'] = price;
+      // request.fields['vehical_no'] = vehicleNo;
+      request.fields['type'] = "other";
+      request.fields['description'] = maintenanceDesciption;
+      request.fields['amount'] = price;
+      request.fields['date'] = date;
 
       // Add image file if exists
       if (imageFile != null) {
         request.files
-            .add(await http.MultipartFile.fromPath('file', imageFile.path));
+            .add(await http.MultipartFile.fromPath('image', imageFile.path));
       }
 
       // Send request
@@ -268,7 +344,7 @@ class Auth {
           print("jsonresponse: $jsonresponse");
         }
 
-        if (jsonresponse['status'] == "success") {
+        if (jsonresponse['status'] == true) {
           return true;
         }
       }
@@ -285,15 +361,23 @@ class Auth {
     try {
       SharedPreferences prefs = await SharedPreferences.getInstance();
       String? driverId = prefs.getString("userid");
+      String? token = prefs.getString("token");
+      if (kDebugMode) {
+        print("--------------------------token: $token");
+      }
       if (kDebugMode) {
         print("--------------------------driverid: $driverId");
       }
-      final response = await http.post(
-        Uri.parse(Constant.viewMaintenance),
-        headers: <String, String>{'Content-Type': 'application/json'},
-        body: jsonEncode(<String, dynamic>{
-          "driver_id": driverId,
-        }),
+      final response = await http.get(
+        Uri.parse(
+            "${Constant.viewMaintenance}maintenance?driver_id=$driverId&type=other"),
+        headers: <String, String>{
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer $token'
+        },
+        // body: jsonEncode(<String, dynamic>{
+        //   "driver_id": driverId,
+        // }),
       );
       if (kDebugMode) {
         print("Constant.addFuel ${Constant.viewMaintenance}");
@@ -307,8 +391,8 @@ class Auth {
           print("jsonresponse: $jsonresponse");
         }
 
-        if (jsonresponse['status'] == "success") {
-          List<dynamic> responseList = jsonresponse["details"];
+        if (jsonresponse['status'] == true) {
+          List<dynamic> responseList = jsonresponse["data"];
           print(
               "-------------------------responseList:${responseList.toString()}");
 
@@ -331,17 +415,26 @@ class Auth {
     try {
       SharedPreferences prefs = await SharedPreferences.getInstance();
       String? driverId = prefs.getString("userid");
+      String? token = prefs.getString("token");
+      if (kDebugMode) {
+        print("--------------------------token: $token");
+      }
       if (kDebugMode) {
         print("--------------------------driverid: $driverId");
       }
-      final response = await http.post(
-        Uri.parse(Constant.veiwAllOrder),
-        headers: <String, String>{'Content-Type': 'application/json'},
-        body: jsonEncode(<String, dynamic>{
-          "driver_id": driverId,
-          "status": "pending"
-          // "driver_id": "1",
-        }),
+      final response = await http.get(
+        Uri.parse(
+            "${Constant.veiwAllOrder}order?driver_id=$driverId&status=pending"),
+        headers: <String, String>{
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer $token',
+        },
+        // body: jsonEncode(<String, dynamic>{
+        //   "driver_id": driverId,
+        //   "status": "pending"
+
+        //   // "driver_id": "1",
+        // }),
       );
       if (kDebugMode) {
         print("Constant.addFuel ${Constant.veiwAllOrder}");
@@ -355,8 +448,8 @@ class Auth {
           print("jsonresponse: $jsonresponse");
         }
 
-        if (jsonresponse['status'] == "success") {
-          List<dynamic> responseList = jsonresponse["details"];
+        if (jsonresponse['status'] == true) {
+          List<dynamic> responseList = jsonresponse["data"];
           print(
               "-------------------------responseList:${responseList.toString()}");
 
@@ -379,17 +472,25 @@ class Auth {
     try {
       SharedPreferences prefs = await SharedPreferences.getInstance();
       String? driverId = prefs.getString("userid");
+      String? token = prefs.getString("token");
+      if (kDebugMode) {
+        print("--------------------------token: $token");
+      }
       if (kDebugMode) {
         print("--------------------------driverid: $driverId");
       }
-      final response = await http.post(
-        Uri.parse(Constant.veiwAllOrder),
-        headers: <String, String>{'Content-Type': 'application/json'},
-        body: jsonEncode(<String, dynamic>{
-          "driver_id": driverId,
-          "status": "completed"
-          // "driver_id": "1",
-        }),
+      final response = await http.get(
+        Uri.parse(
+            "${Constant.veiwAllOrder}order?status=completed&driver_id=$driverId"),
+        headers: <String, String>{
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer $token',
+        },
+        // body: jsonEncode(<String, dynamic>{
+        //   "driver_id": driverId,
+        //   "status": "completed"
+        //   // "driver_id": "1",
+        // }),
       );
       if (kDebugMode) {
         print("Constant.addFuel ${Constant.veiwAllOrder}");
@@ -403,8 +504,8 @@ class Auth {
           print("jsonresponse: $jsonresponse");
         }
 
-        if (jsonresponse['status'] == "success") {
-          List<dynamic> responseList = jsonresponse["details"];
+        if (jsonresponse['status'] == true) {
+          List<dynamic> responseList = jsonresponse["data"];
           print(
               "-------------------------responseList:${responseList.toString()}");
 
@@ -424,6 +525,7 @@ class Auth {
   }
 
   static Future<bool> orderConfirmation(
+    String customerId,
     String orderId,
     String deliverQty,
     String returnQty,
@@ -433,28 +535,47 @@ class Auth {
     try {
       SharedPreferences prefs = await SharedPreferences.getInstance();
       String? driverId = prefs.getString("userid");
-
+      String? token = prefs.getString("token");
+      if (kDebugMode) {
+        print("--------------------------token: $token");
+      }
       if (kDebugMode) {
         print("--------------------------driverid: $driverId");
       }
 
-      var request =
-          http.MultipartRequest("POST", Uri.parse(Constant.confirmOrder));
+      var request = http.MultipartRequest(
+          "POST", Uri.parse("${Constant.confirmOrder}order_update/$orderId"));
+      request.headers.addAll({
+        'Authorization': 'Bearer $token',
+      });
       request.fields['driver_id'] = driverId ?? "";
-      request.fields['order_id'] = orderId;
-      request.fields['delever_qty'] = deliverQty;
+      request.fields['customer_id'] = customerId;
+      request.fields['develivered_qty'] = deliverQty;
       request.fields['return_qty'] = returnQty;
+      request.fields['status'] = "completed";
 
       // Attach images if available
       if (deliveredItem != null) {
-        request.files.add(
-          await http.MultipartFile.fromPath(
-              'deliveredItem', deliveredItem.path),
+        print("Delivered item path: ${deliveredItem.path}");
+        print("Delivered item exists: ${await deliveredItem.exists()}");
+        print("Delivered item path: ${receivedItem!.path}");
+        print("Delivered item exists: ${await receivedItem.exists()}");
+        // request.files.add(
+        //   await http.MultipartFile.fromPath(
+        //     'delevered_card_img',
+        //     deliveredItem.path,
+        //   ),
+        // );
+        http.MultipartFile.fromPath(
+          'delivered_card_img',
+          deliveredItem.path,
+          contentType: MediaType('image', 'jpg'), // This is now recognized
         );
       }
       if (receivedItem != null) {
         request.files.add(
-          await http.MultipartFile.fromPath('reveivedItem', receivedItem.path),
+          await http.MultipartFile.fromPath(
+              'return_card_img', receivedItem.path),
         );
       }
 
@@ -474,7 +595,7 @@ class Auth {
           print("jsonresponse: $jsonresponse");
         }
 
-        if (jsonresponse['status'] == "success") {
+        if (jsonresponse['status'] == true) {
           return true;
         }
       }
@@ -491,16 +612,25 @@ class Auth {
     try {
       SharedPreferences prefs = await SharedPreferences.getInstance();
       String? driverId = prefs.getString("userid");
+      String? token = prefs.getString("token");
+      if (kDebugMode) {
+        print("--------------------------token: $token");
+      }
       if (kDebugMode) {
         print("--------------------------driverid: $driverId");
       }
-      final response = await http.post(
-        Uri.parse(Constant.digitalCard),
-        headers: <String, String>{'Content-Type': 'application/json'},
-        body: jsonEncode(<String, dynamic>{
-          "driver_id": driverId,
-          // "driver_id": "1",
-        }),
+      final response = await http.get(
+        Uri.parse(
+            "${Constant.digitalCard}order?status=completed&driver_id=$driverId"),
+        headers: <String, String>{
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer $token',
+        },
+        // body: jsonEncode(<String, dynamic>{
+        //   "driver_id": driverId,
+        //   // "driver_id": "1",
+
+        // }),
       );
       if (kDebugMode) {
         print("Constant.digitalCard ${Constant.digitalCard}");
@@ -514,8 +644,8 @@ class Auth {
           print("jsonresponse: $jsonresponse");
         }
 
-        if (jsonresponse['status'] == "success") {
-          List<dynamic> responseList = jsonresponse["details"];
+        if (jsonresponse['status'] == true) {
+          List<dynamic> responseList = jsonresponse["data"];
           print(
               "-------------------------responseList:${responseList.toString()}");
 
@@ -534,23 +664,28 @@ class Auth {
     return [];
   }
 
-  static Future<List<Map<String, dynamic>>> orderDetails(String orderId) async {
+  static Future<Map<String, dynamic>?> orderDetails(String orderId) async {
     try {
       SharedPreferences prefs = await SharedPreferences.getInstance();
       String? driverId = prefs.getString("userid");
+      String? token = prefs.getString("token");
+
       if (kDebugMode) {
+        print("--------------------------token: $token");
         print("--------------------------driverid: $driverId");
       }
-      final response = await http.post(
-        Uri.parse(Constant.orderDetails),
-        headers: <String, String>{'Content-Type': 'application/json'},
-        body: jsonEncode(
-            <String, dynamic>{"driver_id": driverId, "order_id": orderId}),
+
+      final response = await http.get(
+        Uri.parse("${Constant.orderDetails}order/$orderId?driver_id=$driverId"),
+        headers: <String, String>{
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer $token'
+        },
       );
+
       if (kDebugMode) {
         print("Constant.orderDetails ${Constant.orderDetails}");
-        print("addFuel response:${response.body}");
-        // return true;
+        print("orderDetails response: ${response.body}");
       }
 
       if (response.statusCode == 200 || response.statusCode == 201) {
@@ -559,23 +694,19 @@ class Auth {
           print("jsonresponse: $jsonresponse");
         }
 
-        if (jsonresponse['status'] == "success") {
-          List<dynamic> responseList = jsonresponse["details"];
-          print(
-              "-------------------------responseList:${responseList.toString()}");
-
-          List<Map<String, dynamic>> orderDetailsList =
-              responseList.cast<Map<String, dynamic>>();
-          return orderDetailsList;
+        if (jsonresponse['status'] == true) {
+          Map<String, dynamic> orderData = jsonresponse["data"];
+          return orderData;
         }
       }
     } catch (e) {
       if (kDebugMode) {
-        print("Login Error $e");
+        print("OrderDetails Error: $e");
       }
-      return [];
+      return null;
     }
-    return [];
+
+    return null;
   }
 
   static Future<bool> deleteAccount() async {

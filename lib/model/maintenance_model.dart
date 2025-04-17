@@ -5,7 +5,7 @@ class MaintenanceModel {
   final String maintenanceType;
   final String maintenanceDescription;
   final String totalAmount;
-  final String isDeleted;
+  final String status;
   final String createdAt;
   final String filepath;
 
@@ -16,22 +16,22 @@ class MaintenanceModel {
     required this.maintenanceType,
     required this.maintenanceDescription,
     required this.totalAmount,
-    required this.isDeleted,
+    required this.status,
     required this.createdAt,
     required this.filepath,
   });
 
   factory MaintenanceModel.fromJson(Map<String, dynamic> json) {
     return MaintenanceModel(
-      id: json['id'],
-      driverId: json['driver_id'],
-      vehicleNo: json['vehical_no'],
-      maintenanceType: json['maintenance_type'],
-      maintenanceDescription: json['maintenance_desciption'],
-      totalAmount: json['total_amount'],
-      isDeleted: json['isdeleted'],
-      createdAt: json['created_at'],
-      filepath: json['filepath'],
+      id: json['id'].toString(),
+      driverId: json['driver_id'].toString(),
+      vehicleNo: json['vehicle_no'].toString(),
+      maintenanceType: json['maintenance_type'].toString(),
+      maintenanceDescription: json['description'].toString(),
+      totalAmount: json['amount'].toString(),
+      status: json['status'].toString(),
+      createdAt: json['created_at'].toString(),
+      filepath: json['filepath'].toString(),
     );
   }
 
@@ -43,7 +43,7 @@ class MaintenanceModel {
       'maintenance_type': maintenanceType,
       'maintenance_desciption': maintenanceDescription,
       'total_amount': totalAmount,
-      'isdeleted': isDeleted,
+      // 'isdeleted': isDeleted,
       'created_at': createdAt,
       'filepath': filepath
     };

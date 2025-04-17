@@ -15,7 +15,7 @@ class CompletedOrderDetails extends StatefulWidget {
 }
 
 class _CompletedOrderDetailsState extends State<CompletedOrderDetails> {
-  List<Map<String, dynamic>> orderDetailsList = [];
+  Map<String, dynamic>? orderDetails;
   bool _isLoading = true;
 
   @override
@@ -26,11 +26,11 @@ class _CompletedOrderDetailsState extends State<CompletedOrderDetails> {
 
   Future<void> fetchOrderDetails() async {
     try {
-      List<Map<String, dynamic>> orderDetails =
+      Map<String, dynamic>? fetchedDetails =
           await Auth.orderDetails(widget.order.orderId);
 
       setState(() {
-        orderDetailsList = orderDetails;
+        orderDetails = fetchedDetails;
         _isLoading = false;
       });
     } catch (e) {
@@ -60,7 +60,7 @@ class _CompletedOrderDetailsState extends State<CompletedOrderDetails> {
         padding: const EdgeInsets.all(16.0),
         child: _isLoading
             ? const Center(child: CircularProgressIndicator(color: Colors.blue))
-            : orderDetailsList.isEmpty
+            : orderDetails == null
                 ? const Center(child: Text("No details found"))
                 : SingleChildScrollView(
                     // Prevents overflow issue
@@ -89,7 +89,7 @@ class _CompletedOrderDetailsState extends State<CompletedOrderDetails> {
                                       MainAxisAlignment.spaceBetween,
                                   children: [
                                     Text(
-                                      widget.order.orderId,
+                                      "Order ID: ${widget.order.orderId}",
                                       style: const TextStyle(
                                         color: Colors.blue,
                                         fontWeight: FontWeight.bold,
@@ -130,23 +130,24 @@ class _CompletedOrderDetailsState extends State<CompletedOrderDetails> {
                                   child: Row(
                                     mainAxisAlignment: MainAxisAlignment.start,
                                     children: [
-                                      if (orderDetailsList.isNotEmpty)
-                                        itemCard(
-                                          "Delivered Jars",
-                                          orderDetailsList[0]['deliveredItem'],
-                                          int.tryParse(orderDetailsList[0]
-                                                  ['delever_qty']) ??
-                                              0,
-                                        ),
+                                      itemCard(
+                                        "Delivered Jars",
+                                        orderDetails?['deliveredItem'],
+                                        int.tryParse(
+                                                orderDetails?['develivered_qty']
+                                                        ?.toString() ??
+                                                    '0') ??
+                                            0,
+                                      ),
                                       const SizedBox(width: 20),
-                                      if (orderDetailsList.isNotEmpty)
-                                        itemCard(
-                                          "Returned Jars",
-                                          orderDetailsList[0]['reveivedItem'],
-                                          int.tryParse(orderDetailsList[0]
-                                                  ['return_qty']) ??
-                                              0,
-                                        ),
+                                      itemCard(
+                                        "Returned Jars",
+                                        orderDetails?['reveivedItem'],
+                                        int.tryParse(orderDetails?['return_qty']
+                                                    ?.toString() ??
+                                                '0') ??
+                                            0,
+                                      ),
                                     ],
                                   ),
                                 ),
@@ -163,7 +164,7 @@ class _CompletedOrderDetailsState extends State<CompletedOrderDetails> {
 
   Widget itemCard(String title, String? imagePath, int count) {
     return GestureDetector(
-      onTap: () => _showFullImage(context, imagePath!),
+      onTap: () => _showFullImage(context, imagePath ?? ""),
       child: Column(
         children: [
           Text(title, style: const TextStyle(fontWeight: FontWeight.bold)),
