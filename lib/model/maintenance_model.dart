@@ -31,7 +31,7 @@ class MaintenanceModel {
       totalAmount: json['amount'].toString(),
       status: json['status'].toString(),
       createdAt: json['created_at'].toString(),
-      filepath: json['filepath'].toString(),
+      filepath: json['bill'].toString(),
     );
   }
 
@@ -45,7 +45,7 @@ class MaintenanceModel {
       'total_amount': totalAmount,
       // 'isdeleted': isDeleted,
       'created_at': createdAt,
-      'filepath': filepath
+      'bill': filepath
     };
   }
 }

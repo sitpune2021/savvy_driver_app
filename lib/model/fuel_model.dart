@@ -34,8 +34,8 @@ class FuelModel {
       totalFuel: json['description'].toString() ?? '',
       // isDeleted: json['isdeleted'] ?? '',
       createdAt: json['created_at'].toString() ?? '',
-      filepath1: json['filepath1'].toString() ?? '',
-      filepath2: json['filepath2'].toString() ?? '',
+      filepath1: json['metercopy'].toString() ?? '',
+      filepath2: json['recipt'].toString() ?? '',
     );
   }
 

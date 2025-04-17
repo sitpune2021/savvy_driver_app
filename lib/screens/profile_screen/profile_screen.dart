@@ -449,18 +449,32 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     ),
                     onPressed: () async {
                       // Handle Delete Action
-                      Navigator.pop(context);
                       SharedPreferences preferences =
                           await SharedPreferences.getInstance();
-                      preferences.clear();
-                      Navigator.pushReplacement(
-                          context,
-                          PageTransition(
-                              type: PageTransitionType.rightToLeft,
-                              duration: const Duration(milliseconds: 200),
-                              reverseDuration:
-                                  const Duration(milliseconds: 200),
-                              child: const LoginScreen()));
+                      final driverId = preferences.getString("userid");
+                      print(
+                          "******************************logout driverID $driverId");
+                      final result = await Auth.logout();
+                      // bool result = true;
+                      if (result) {
+                        Navigator.pop(context);
+
+                        preferences.clear();
+                        Navigator.pushReplacement(
+                            context,
+                            PageTransition(
+                                type: PageTransitionType.rightToLeft,
+                                duration: const Duration(milliseconds: 200),
+                                reverseDuration:
+                                    const Duration(milliseconds: 200),
+                                child: const LoginScreen()));
+                      } else {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(
+                              content:
+                                  Text('Server Error please try again later!')),
+                        );
+                      }
                     },
                     child: const Text(
                       "Log Out",

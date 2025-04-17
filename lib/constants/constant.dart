@@ -1,6 +1,7 @@
 class Constant {
   // static const baseurl = "http://savvywater.sitsolutions.co.in/";
   static const baseurl = "https://savvywater.demosoftware.co.in/api/";
+  // static const baseurl = "http://192.168.1.43:8000/api/";
 
   // static const login = "${baseurl}APP_loginCheck";
   // static const addFuel = "${baseurl}APP_FuleAdd";
@@ -26,5 +27,6 @@ class Constant {
   static const orderDetails = "${baseurl}";
   static const orderStatistics = "$baseurl";
   static const deleteAccount =
-      "${baseurl}deleteProfile"; // this one is yet to integrate.
+      "${baseurl}profile/"; // this one is yet to integrate.
+  static const logout = "${baseurl}logout";
 }

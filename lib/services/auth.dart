@@ -146,14 +146,14 @@ class Auth {
       if (meterPhoto != null) {
         print("📷 Meter Photo Path: ${meterPhoto.path}");
         request.files.add(await http.MultipartFile.fromPath(
-            'file', // This should match your API parameter name
+            'images[metercopy]', // This should match your API parameter name
             meterPhoto.path));
       }
 
       if (receiptPhoto != null) {
         print("📷 Receipt Photo Path: ${receiptPhoto.path}");
         request.files.add(await http.MultipartFile.fromPath(
-          'file1', // This should match your API parameter name
+          'images[recipt]', // This should match your API parameter name
           receiptPhoto.path,
         ));
       }
@@ -325,8 +325,10 @@ class Auth {
 
       // Add image file if exists
       if (imageFile != null) {
-        request.files
-            .add(await http.MultipartFile.fromPath('image', imageFile.path));
+        request.files.add(
+            await http.MultipartFile.fromPath('images[bill]', imageFile.path));
+        print("imageFile item path: ${imageFile.path}");
+        print("imageFile item exists: ${await imageFile.exists()}");
       }
 
       // Send request
@@ -545,9 +547,8 @@ class Auth {
 
       var request = http.MultipartRequest(
           "POST", Uri.parse("${Constant.confirmOrder}order_update/$orderId"));
-      request.headers.addAll({
-        'Authorization': 'Bearer $token',
-      });
+      request.headers.addAll(
+          {'Authorization': 'Bearer $token', 'Accept': 'application/json'});
       request.fields['driver_id'] = driverId ?? "";
       request.fields['customer_id'] = customerId;
       request.fields['develivered_qty'] = deliverQty;
@@ -556,27 +557,37 @@ class Auth {
 
       // Attach images if available
       if (deliveredItem != null) {
-        print("Delivered item path: ${deliveredItem.path}");
-        print("Delivered item exists: ${await deliveredItem.exists()}");
-        print("Delivered item path: ${receivedItem!.path}");
-        print("Delivered item exists: ${await receivedItem.exists()}");
+        //   print("Delivered item path: ${deliveredItem.path}");
+        //   print("Delivered item exists: ${await deliveredItem.exists()}");
+        //   print("Delivered item path: ${receivedItem!.path}");
+        //   print("Delivered item exists: ${await receivedItem.exists()}");
+        //   request.files.add(
+        //     await http.MultipartFile.fromPath(
+        //       'delevered_card_img',
+        //       deliveredItem.path,
+        //     ),
+        //   );
+        //   // http.MultipartFile.fromPath(
+        //   //   'delevered_card_img',
+        //   //   deliveredItem.path,
+        //   //   contentType: MediaType('image', 'jpg'), // This is now recognized
+        //   // );
+
+        final bytes = await deliveredItem.readAsBytes();
+        final base64Image = base64Encode(bytes);
+
+        request.fields['delevered_card_img'] = base64Image;
+      }
+
+      if (receivedItem != null) {
         // request.files.add(
         //   await http.MultipartFile.fromPath(
-        //     'delevered_card_img',
-        //     deliveredItem.path,
-        //   ),
+        //       'return_card_img', receivedItem.path),
         // );
-        http.MultipartFile.fromPath(
-          'delivered_card_img',
-          deliveredItem.path,
-          contentType: MediaType('image', 'jpg'), // This is now recognized
-        );
-      }
-      if (receivedItem != null) {
-        request.files.add(
-          await http.MultipartFile.fromPath(
-              'return_card_img', receivedItem.path),
-        );
+        final bytes = await receivedItem.readAsBytes();
+        final base64Image = base64Encode(bytes);
+
+        request.fields['return_card_img'] = base64Image;
       }
 
       // var streamedResponse = await request.send();
@@ -713,13 +724,16 @@ class Auth {
     try {
       SharedPreferences prefs = await SharedPreferences.getInstance();
       String? driverId = prefs.getString("userid");
+      String? token = prefs.getString("token");
       if (kDebugMode) {
         print("--------------------------driverid: $driverId");
       }
-      final response = await http.post(
-        Uri.parse(Constant.deleteAccount),
-        headers: <String, String>{'Content-Type': 'application/json'},
-        body: jsonEncode(<String, dynamic>{"driver_id": driverId}),
+      final response = await http.delete(
+        Uri.parse("${Constant.deleteAccount}$driverId"),
+        headers: <String, String>{
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer $token'
+        },
       );
       if (kDebugMode) {
         print("Constant.deleteAccount ${Constant.deleteAccount}");
@@ -733,13 +747,53 @@ class Auth {
           print("jsonresponse: $jsonresponse");
         }
 
-        if (jsonresponse['status'] == "success") {
+        if (jsonresponse['status'] == true) {
           return true;
         }
       }
     } catch (e) {
       if (kDebugMode) {
         print("Delete Account Error $e");
+      }
+      return false;
+    }
+    return false;
+  }
+
+  static Future<bool> logout() async {
+    try {
+      SharedPreferences prefs = await SharedPreferences.getInstance();
+      String? driverId = prefs.getString("userid");
+      String? token = prefs.getString("token");
+      final response = await http.post(
+        Uri.parse(Constant.logout),
+        headers: <String, String>{
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer $token'
+        },
+        body: jsonEncode(<String, dynamic>{
+          "driver_id": driverId,
+        }),
+      );
+      if (kDebugMode) {
+        print("Constant.logout ${Constant.logout}");
+        print("Login response:${response.body}");
+        // logout true;
+      }
+
+      if (response.statusCode == 200 || response.statusCode == 201) {
+        final jsonresponse = jsonDecode(response.body);
+        if (kDebugMode) {
+          print("jsonresponse: $jsonresponse");
+        }
+
+        if (jsonresponse['status'] == true) {
+          return true;
+        }
+      }
+    } catch (e) {
+      if (kDebugMode) {
+        print("Logout Error $e");
       }
       return false;
     }

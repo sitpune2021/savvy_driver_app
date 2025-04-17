@@ -132,7 +132,7 @@ class _CompletedOrderDetailsState extends State<CompletedOrderDetails> {
                                     children: [
                                       itemCard(
                                         "Delivered Jars",
-                                        orderDetails?['deliveredItem'],
+                                        orderDetails?['delevered_card_img'],
                                         int.tryParse(
                                                 orderDetails?['develivered_qty']
                                                         ?.toString() ??
@@ -142,7 +142,7 @@ class _CompletedOrderDetailsState extends State<CompletedOrderDetails> {
                                       const SizedBox(width: 20),
                                       itemCard(
                                         "Returned Jars",
-                                        orderDetails?['reveivedItem'],
+                                        orderDetails?['return_card_img'],
                                         int.tryParse(orderDetails?['return_qty']
                                                     ?.toString() ??
                                                 '0') ??

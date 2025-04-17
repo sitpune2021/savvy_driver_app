@@ -79,11 +79,11 @@ class _FuelDetailsState extends State<FuelDetails> {
               _buildTextField(_priceController, "Price"),
 
               // Receipt Image
-              _buildLabel("Receipt"),
+              _buildLabel("Meter Photo"),
               _buildImageContainer(widget.filepath1),
 
               // Meter Photo
-              _buildLabel("Meter Photo"),
+              _buildLabel("Receipt"),
               _buildImageContainer(widget.filepath2),
             ],
           ),
