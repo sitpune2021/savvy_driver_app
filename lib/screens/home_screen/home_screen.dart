@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:page_transition/page_transition.dart';
 import 'package:savvy_aqua_delivery/constants/Constant.dart';
 import 'package:savvy_aqua_delivery/model/order_model.dart';
+import 'package:savvy_aqua_delivery/screens/login_screen/login_screen.dart';
 import 'package:savvy_aqua_delivery/screens/order_screen/order_screen.dart';
 import 'package:savvy_aqua_delivery/screens/order_screen/widget/order_card.dart';
 import 'package:savvy_aqua_delivery/services/auth.dart';
@@ -25,6 +26,7 @@ class _HomeScreenState extends State<HomeScreen> {
   int totalDeliveryCount = 0;
   int totalDeliveredCount = 0;
   bool isLoading = true;
+  bool isSessionOut = false;
 
   @override
   void initState() {
@@ -65,6 +67,15 @@ class _HomeScreenState extends State<HomeScreen> {
             isLoading = false;
           });
         }
+      } else if (response.statusCode == 401) {
+        final data = jsonDecode(response.body);
+        print("--------------------------dashboard statistics $data");
+        if (data['status'] == false) {
+          setState(() {
+            isSessionOut = true;
+          });
+          print("--------------------------session statistics $isSessionOut");
+        }
       }
     } catch (e) {
       print("Error fetching dashboard data: $e");
@@ -86,6 +97,17 @@ class _HomeScreenState extends State<HomeScreen> {
 
   @override
   Widget build(BuildContext context) {
+    if (isSessionOut) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (context.mounted) {
+          showDialog(
+            context: context,
+            barrierDismissible: false,
+            builder: (_) => _checkSession(),
+          );
+        }
+      });
+    }
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
@@ -258,6 +280,87 @@ class _HomeScreenState extends State<HomeScreen> {
         );
       },
     );
+  }
+
+  Widget _checkSession() {
+    // showDialog(
+    //   context: context,
+    //   barrierDismissible: true,
+    //   builder: (BuildContext context) {
+    return Dialog(
+      backgroundColor: Colors.white,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(16.0),
+      ),
+      child: Padding(
+        padding: const EdgeInsets.all(20.0),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const Text(
+              "Session Time Out\nPlease login again",
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            const SizedBox(height: 20),
+
+            // Delete Account Button
+            SizedBox(
+              width: double.infinity,
+              child: ElevatedButton(
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.blue,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                ),
+                onPressed: () async {
+                  // Handle Delete Action
+                  SharedPreferences preferences =
+                      await SharedPreferences.getInstance();
+                  final driverId = preferences.getString("userid");
+                  print(
+                      "******************************logout driverID $driverId");
+                  // final result = await Auth.logout();
+                  // bool result = true;
+                  // if (result) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text('Logged out successfully')),
+                  );
+                  Navigator.pop(context);
+
+                  preferences.clear();
+                  Navigator.pushReplacement(
+                      context,
+                      PageTransition(
+                          type: PageTransitionType.rightToLeft,
+                          duration: const Duration(milliseconds: 200),
+                          reverseDuration: const Duration(milliseconds: 200),
+                          child: const LoginScreen()));
+                  // }
+                  // else {
+                  //   ScaffoldMessenger.of(context).showSnackBar(
+                  //     const SnackBar(
+                  //         content:
+                  //             Text('Server Error please try again later!')),
+                  //   );
+                  // }
+                },
+                child: const Text(
+                  "Log Out",
+                  style: TextStyle(color: Colors.white, fontSize: 16),
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+    //   },
+    // );
   }
 
   Widget _buildLoadingIndicator() {

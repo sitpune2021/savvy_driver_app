@@ -154,6 +154,10 @@ class _LoginScreenState extends State<LoginScreen> {
 
                           if (result) {
                             _mobileNo.clear();
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(
+                                  content: Text('Otp Sent Successfully')),
+                            );
                             // _mobileNo.dispose();
                             Navigator.push(
                               context,

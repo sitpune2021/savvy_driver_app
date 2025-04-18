@@ -15,6 +15,18 @@ class _OrderCardState extends State<OrderCard> {
   @override
   Widget build(BuildContext context) {
     DateTime orderDate = DateFormat("yyyy-MM-dd").parse(widget.order.createdAt);
+
+// Get only the date part for comparison
+    DateTime today = DateTime.now();
+    DateTime yesterday = DateTime(today.year, today.month, today.day)
+        .subtract(Duration(days: 1));
+    DateTime parsedOrderDate =
+        DateTime(orderDate.year, orderDate.month, orderDate.day);
+
+// Check if order date is yesterday
+    bool isHighPriority = parsedOrderDate == yesterday;
+
+// Format date as "day-month-year"
     String date = "${orderDate.day}-${orderDate.month}-${orderDate.year}";
     print("*******date $date");
     return Card(
@@ -92,6 +104,16 @@ class _OrderCardState extends State<OrderCard> {
                   ],
                 ),
               ],
+            ),
+            const SizedBox(height: 5),
+
+            Text(
+              isHighPriority ? "HIGH PRIORITY" : "Normal",
+              style: TextStyle(
+                color: isHighPriority ? Colors.red : Colors.black,
+                fontWeight:
+                    isHighPriority ? FontWeight.bold : FontWeight.normal,
+              ),
             ),
           ],
         ),

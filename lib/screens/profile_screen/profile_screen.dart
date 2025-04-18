@@ -458,7 +458,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       // bool result = true;
                       if (result) {
                         Navigator.pop(context);
-
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(
+                              content: Text('Logged out successfully')),
+                        );
                         preferences.clear();
                         Navigator.pushReplacement(
                             context,
