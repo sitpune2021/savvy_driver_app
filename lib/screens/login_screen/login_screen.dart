@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:savvy_aqua_delivery/constants/color_constants.dart';
 import 'package:savvy_aqua_delivery/screens/otp_screen/otp_screen.dart';
 import 'package:savvy_aqua_delivery/services/auth.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -27,6 +28,15 @@ class _LoginScreenState extends State<LoginScreen> {
       return "Mobile No must be 10 digits";
     }
     return "";
+  }
+
+  void _launchPrivacyPolicy() async {
+    final Uri url =
+        Uri.parse("https://savvywater.demosoftware.co.in/privicy-policy");
+
+    if (!await launchUrl(url, mode: LaunchMode.externalApplication)) {
+      throw Exception('Could not launch $url');
+    }
   }
 
   @override
@@ -113,22 +123,9 @@ class _LoginScreenState extends State<LoginScreen> {
                       ),
                     ],
                   ),
-                  const SizedBox(height: 10),
+                  // const SizedBox(height: 10),
 
-                  // Keep me logged in Checkbox
-                  Row(
-                    children: [
-                      Checkbox(
-                        value: _keepLoggedIn,
-                        onChanged: (value) {
-                          setState(() {
-                            _keepLoggedIn = value!;
-                          });
-                        },
-                      ),
-                      const Text("Keep me logged in"),
-                    ],
-                  ),
+                  // // Keep me logged in Checkbox
 
                   const SizedBox(height: 30),
 
@@ -181,6 +178,20 @@ class _LoginScreenState extends State<LoginScreen> {
                       child: const Text("Log In",
                           style: TextStyle(color: Colors.white)),
                     ),
+                  ),
+                  const SizedBox(height: 30),
+
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      TextButton(
+                        onPressed: _launchPrivacyPolicy,
+                        child: const Text(
+                          "privacy policy",
+                          style: TextStyle(color: Colors.blue),
+                        ),
+                      )
+                    ],
                   ),
                 ],
               ),

@@ -84,7 +84,7 @@ class _OrderCardState extends State<OrderCard> {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                const Text("Quantity", style: TextStyle(color: Colors.black54)),
+                const Text("Balance", style: TextStyle(color: Colors.black54)),
                 Text("${widget.order.qty} Bottles",
                     style: const TextStyle(fontWeight: FontWeight.bold)),
               ],

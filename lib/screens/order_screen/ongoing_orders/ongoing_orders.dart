@@ -63,6 +63,7 @@ class _OngoingOrdersState extends State<OngoingOrders> {
                 order.customerName
                     .toLowerCase()
                     .contains(query.toLowerCase()) ||
+                order.orderId.toLowerCase().contains(query.toLowerCase()) ||
                 order.createdAt.toLowerCase().contains(query.toLowerCase()))
             .toList();
       }

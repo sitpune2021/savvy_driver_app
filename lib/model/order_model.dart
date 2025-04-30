@@ -7,8 +7,8 @@ class OrderModel {
   final String customerAddress;
   final String qty;
   final String status;
-
   final String createdAt;
+  final List<ShippingContact> shippingContacts;
 
   OrderModel({
     required this.id,
@@ -20,6 +20,7 @@ class OrderModel {
     required this.qty,
     required this.status,
     required this.createdAt,
+    required this.shippingContacts,
   });
 
   factory OrderModel.fromJson(Map<String, dynamic> json) {
@@ -30,9 +31,13 @@ class OrderModel {
       customerId: json['customer_id'].toString(),
       customerName: json['customer_name'].toString(),
       customerAddress: json['shipping_address'].toString(),
-      qty: json['develivered_qty'].toString(),
+      qty: json['balance'].toString(),
       status: json['status'].toString(),
       createdAt: json['created_at'].toString(),
+      shippingContacts: (json['shipping_contacts'] as List<dynamic>?)
+              ?.map((e) => ShippingContact.fromJson(e))
+              .toList() ??
+          [],
     );
   }
 
@@ -47,11 +52,44 @@ class OrderModel {
       'qty': qty,
       'status': status,
       'created_at': createdAt,
+      'shipping_contacts': shippingContacts.map((e) => e.toJson()).toList(),
     };
   }
 
   @override
   String toString() {
-    return 'OrderModel(id: $id, driverId: $driverId, orderId: $orderId, customerId: $customerId, customerName: $customerName, customerAddress: $customerAddress, qty: $qty, status: $status, createdAt: $createdAt)';
+    return 'OrderModel(id: $id, driverId: $driverId, orderId: $orderId, '
+        'customerId: $customerId, customerName: $customerName, '
+        'customerAddress: $customerAddress, qty: $qty, status: $status, '
+        'createdAt: $createdAt, shippingContacts: $shippingContacts)';
+  }
+}
+
+class ShippingContact {
+  final String name;
+  final String phone;
+
+  ShippingContact({
+    required this.name,
+    required this.phone,
+  });
+
+  factory ShippingContact.fromJson(Map<String, dynamic> json) {
+    return ShippingContact(
+      name: json['name'].toString(),
+      phone: json['phone'].toString(),
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'name': name,
+      'phone': phone,
+    };
+  }
+
+  @override
+  String toString() {
+    return 'ShippingContact(name: $name, phone: $phone)';
   }
 }

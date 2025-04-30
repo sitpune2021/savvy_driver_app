@@ -1,7 +1,7 @@
 class Constant {
   // static const baseurl = "http://savvywater.sitsolutions.co.in/";
   static const baseurl = "https://savvywater.demosoftware.co.in/api/";
-  // static const baseurl = "http://192.168.1.43:8000/api/";
+  // static const baseurl = "http://192.168.1.46:8000/api/";
 
   // static const login = "${baseurl}APP_loginCheck";
   // static const addFuel = "${baseurl}APP_FuleAdd";

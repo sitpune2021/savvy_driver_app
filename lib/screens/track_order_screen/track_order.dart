@@ -7,6 +7,7 @@ import 'package:intl/intl.dart';
 import 'package:page_transition/page_transition.dart';
 import 'package:savvy_aqua_delivery/model/order_model.dart';
 import 'package:savvy_aqua_delivery/screens/order_confirmation_screen/order_confirmation.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class TrackOrder extends StatefulWidget {
   final OrderModel order;
@@ -228,13 +229,67 @@ class _TrackOrderState extends State<TrackOrder> {
                           Row(
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
-                              const Text("Quantity",
+                              const Text("Balance",
                                   style: TextStyle(color: Colors.black54)),
                               Text("${widget.order.qty} Bottles",
                                   style: const TextStyle(
                                       fontWeight: FontWeight.bold)),
                             ],
                           ),
+                          const SizedBox(height: 5),
+                          const Divider(),
+
+                          Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              const Text(
+                                "Contact Person",
+                                style: TextStyle(
+                                  color: Colors.black,
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+
+                              // Check if the list is empty
+                              if (widget.order.shippingContacts.isEmpty)
+                                const Padding(
+                                  padding: EdgeInsets.only(top: 8.0),
+                                  child: Text(
+                                    "No contact info available",
+                                    style: TextStyle(color: Colors.black54),
+                                  ),
+                                )
+                              else
+                                ...widget.order.shippingContacts.map((contact) {
+                                  return Row(
+                                    mainAxisAlignment:
+                                        MainAxisAlignment.spaceBetween,
+                                    children: [
+                                      Expanded(
+                                        child: Text(
+                                          contact.name,
+                                          style: const TextStyle(
+                                              color: Colors.black54),
+                                        ),
+                                      ),
+                                      IconButton(
+                                        icon: const Icon(Icons.phone,
+                                            color: Colors.blue),
+                                        onPressed: () {
+                                          final Uri phoneUri = Uri(
+                                              scheme: 'tel',
+                                              path: contact.phone);
+                                          launchUrl(phoneUri);
+                                        },
+                                      ),
+                                    ],
+                                  );
+                                }),
+                            ],
+                          ),
+
+                          // Quantity row
                         ],
                       ),
                     ),
