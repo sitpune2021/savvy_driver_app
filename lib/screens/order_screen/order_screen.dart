@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:savvy_aqua_delivery/screens/order_screen/completed_orders/completed_orders.dart';
+import 'package:savvy_aqua_delivery/screens/order_screen/in_progress_orders/in_progress_orders.dart';
 import 'package:savvy_aqua_delivery/screens/order_screen/ongoing_orders/ongoing_orders.dart';
 
 class OrderScreen extends StatefulWidget {
@@ -14,7 +15,7 @@ class _OrderScreenState extends State<OrderScreen>
   @override
   void initState() {
     super.initState();
-    _tabController = TabController(length: 2, vsync: this);
+    _tabController = TabController(length: 3, vsync: this);
   }
 
   @override
@@ -40,6 +41,7 @@ class _OrderScreenState extends State<OrderScreen>
           tabs: const [
             Tab(text: "Ongoing Orders"),
             Tab(text: "Completed Orders"),
+            Tab(text: "In-Progress Orders"),
           ],
         ),
       ),
@@ -47,7 +49,8 @@ class _OrderScreenState extends State<OrderScreen>
         controller: _tabController,
         children: const [
           OngoingOrders(), // Ongoing Orders
-          CompletedOrders() // Placeholder for completed orders
+          CompletedOrders(), // Placeholder for completed orders
+          InProgressOrders()
         ],
       ),
     );

@@ -50,6 +50,7 @@ class _VehicleMaintenanceState extends State<VehicleMaintenance> {
 
     try {
       List<MaintenanceModel> list = await Auth.maintenanceList();
+      list = list.reversed.toList();
       setState(() {
         allMaintenanceList = list;
         filteredMaintenanceList = list;

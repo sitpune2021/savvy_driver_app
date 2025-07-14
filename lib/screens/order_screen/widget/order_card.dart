@@ -39,9 +39,6 @@ class _OrderCardState extends State<OrderCard> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text("Order ID: ${widget.order.orderId}",
-                style: const TextStyle(
-                    color: Colors.blue, fontWeight: FontWeight.bold)),
             const SizedBox(height: 5),
             // Row(
             //   mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -58,18 +55,23 @@ class _OrderCardState extends State<OrderCard> {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Flexible(
-                  child: Text(
-                    widget.order.customerName,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: const TextStyle(
-                        fontSize: 16, fontWeight: FontWeight.bold),
-                  ),
+                  child: Text("Order ID: ${widget.order.orderId}",
+                      style: const TextStyle(
+                          color: Colors.blue, fontWeight: FontWeight.bold)),
                 ),
                 Text(date, style: const TextStyle(color: Colors.black)),
               ],
             ),
             const SizedBox(height: 5),
+            Text(
+              widget.order.customerName,
+              maxLines: 3,
+              overflow: TextOverflow.ellipsis,
+              style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+            ),
+
+            const SizedBox(height: 5),
+
             Row(
               children: [
                 const Icon(Icons.location_on, color: Colors.blue, size: 18),

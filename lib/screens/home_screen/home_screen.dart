@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:page_transition/page_transition.dart';
@@ -27,12 +29,39 @@ class _HomeScreenState extends State<HomeScreen> {
   int totalDeliveredCount = 0;
   bool isLoading = true;
   bool isSessionOut = false;
+  // Timer? _acceptOrderPollingTimer;
 
   @override
   void initState() {
     super.initState();
     fetchDashboardData();
   }
+
+  // @override
+  // void dispose() {
+  //   _acceptOrderPollingTimer?.cancel();
+  //   super.dispose();
+  // }
+
+  // @override
+  // void didChangeDependencies() {
+  //   super.didChangeDependencies();
+  //   if (_acceptOrderPollingTimer == null) {
+  //     WidgetsBinding.instance.addPostFrameCallback((_) {
+  //       _startPollingDashboardData();
+  //     });
+  //   }
+  // }
+
+  // void _startPollingDashboardData() {
+  //   fetchDashboardData(); // fetch immediately
+  //   _acceptOrderPollingTimer?.cancel(); // cancel existing one if any
+  //   _acceptOrderPollingTimer =
+  //       Timer.periodic(const Duration(seconds: 10), (timer) {
+  //     fetchDashboardData();
+  //     // _loadOngoingOrder();
+  //   });
+  // }
 
   Future<void> fetchDashboardData() async {
     try {
@@ -59,11 +88,11 @@ class _HomeScreenState extends State<HomeScreen> {
         print("--------------------------dashboard statistics $data");
         if (data['status'] == true) {
           setState(() {
-            todaysOrder = data['data']['todays_orders'];
-            todaysPending = data['data']['todays_pending_orders'];
-            todaysCompleted = data['data']['todays_completed_orders'];
-            totalDeliveryCount = data['data']['total_delivery_count'];
-            totalDeliveredCount = data['data']['total_deliverd_count'];
+            todaysOrder = data['data']['todays_orders'] ?? 0;
+            todaysPending = data['data']['todays_pending_orders'] ?? 0;
+            todaysCompleted = data['data']['todays_completed_orders'] ?? 0;
+            totalDeliveryCount = data['data']['total_delivery_count'] ?? 0;
+            totalDeliveredCount = data['data']['total_deliverd_count'] ?? 0;
             isLoading = false;
           });
         }

@@ -9,6 +9,7 @@ import 'package:savvy_aqua_delivery/model/digital_card_model.dart';
 import 'package:savvy_aqua_delivery/model/fuel_model.dart';
 import 'package:savvy_aqua_delivery/model/maintenance_model.dart';
 import 'package:savvy_aqua_delivery/model/order_model.dart';
+import 'package:savvy_aqua_delivery/model/paginated_order_model.dart';
 import 'package:savvy_aqua_delivery/model/user_model.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -470,6 +471,36 @@ class Auth {
     return [];
   }
 
+  static Future<PaginatedOrderModel?> orderListPaginated(
+    String status, {
+    int page = 1,
+  }) async {
+    try {
+      SharedPreferences prefs = await SharedPreferences.getInstance();
+      String? driverId = prefs.getString("userid");
+      String? token = prefs.getString("token");
+
+      final response = await http.get(
+        Uri.parse(
+            "${Constant.veiwAllOrder}order?driver_id=$driverId&status=$status&page=$page"),
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer $token',
+        },
+      );
+
+      if (response.statusCode == 200 || response.statusCode == 201) {
+        final jsonresponse = jsonDecode(response.body);
+        if (jsonresponse['status'] == true) {
+          return PaginatedOrderModel.fromJson(jsonresponse);
+        }
+      }
+    } catch (e) {
+      if (kDebugMode) print("orderList error: $e");
+    }
+    return null;
+  }
+
   static Future<List<OrderModel>> completedOrderList() async {
     try {
       SharedPreferences prefs = await SharedPreferences.getInstance();
@@ -578,6 +609,8 @@ class Auth {
 
         request.fields['delevered_card_img'] = base64Image;
       }
+      print(
+          "url for order confirmation ${Constant.confirmOrder}order_update/$orderId");
 
       if (receivedItem != null) {
         // request.files.add(
@@ -586,7 +619,7 @@ class Auth {
         // );
         final bytes = await receivedItem.readAsBytes();
         final base64Image = base64Encode(bytes);
-
+        print("base64 $base64Image");
         request.fields['return_card_img'] = base64Image;
       }
 
@@ -631,8 +664,7 @@ class Auth {
         print("--------------------------driverid: $driverId");
       }
       final response = await http.get(
-        Uri.parse(
-            "${Constant.digitalCard}order?status=completed&driver_id=$driverId"),
+        Uri.parse(Constant.digitalCard),
         headers: <String, String>{
           'Content-Type': 'application/json',
           'Authorization': 'Bearer $token',
@@ -673,6 +705,35 @@ class Auth {
       return [];
     }
     return [];
+  }
+
+  static Future<Map<String, dynamic>> fetchDigitalCardPage(int page) async {
+    final prefs = await SharedPreferences.getInstance();
+    final token = prefs.getString('token') ?? '';
+
+    final response = await http.get(
+      Uri.parse('${Constant.digitalCard}?page=$page'),
+      headers: {
+        'Authorization': 'Bearer $token',
+        'Accept': 'application/json',
+      },
+    );
+
+    if (response.statusCode == 200 || response.statusCode == 201) {
+      final jsonData = json.decode(response.body);
+      final data = jsonData['data'];
+
+      final List<DigitalCardModel> cards = (data['data'] as List)
+          .map((e) => DigitalCardModel.fromJson(e))
+          .toList();
+
+      return {
+        'cards': cards,
+        'last_page': data['last_page'],
+      };
+    } else {
+      throw Exception("Failed to fetch digital card page");
+    }
   }
 
   static Future<Map<String, dynamic>?> orderDetails(String orderId) async {

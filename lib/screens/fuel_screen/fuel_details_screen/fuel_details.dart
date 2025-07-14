@@ -128,6 +128,8 @@ class _FuelDetailsState extends State<FuelDetails> {
   }
 
   Widget _buildImageContainer(String imageUrl) {
+    print(
+        "***************image url test for no image found $imageUrl ***********************");
     return GestureDetector(
       onTap: () => _showFullImage(context, imageUrl),
       child: Container(
@@ -140,31 +142,45 @@ class _FuelDetailsState extends State<FuelDetails> {
         ),
         child: ClipRRect(
           borderRadius: BorderRadius.circular(8),
-          child: Image.network(
-            imageUrl,
-            fit: BoxFit.cover,
-            loadingBuilder: (context, child, loadingProgress) {
-              if (loadingProgress == null) return child;
-              return const Center(
-                  child:
-                      CircularProgressIndicator()); // Show loader while image is loading
-            },
-            errorBuilder: (context, error, stackTrace) {
-              return const Center(
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Icon(Icons.broken_image, color: Colors.red, size: 40),
-                    SizedBox(height: 5),
-                    Text(
-                      "Failed to load image",
-                      style: TextStyle(color: Colors.red),
-                    ),
-                  ],
+          child: imageUrl == "null"
+              ? const Center(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(Icons.broken_image, color: Colors.grey, size: 40),
+                      SizedBox(height: 5),
+                      Text(
+                        "No image found",
+                        style: TextStyle(color: Colors.black),
+                      ),
+                    ],
+                  ),
+                )
+              : Image.network(
+                  imageUrl,
+                  fit: BoxFit.cover,
+                  loadingBuilder: (context, child, loadingProgress) {
+                    if (loadingProgress == null) return child;
+                    return const Center(
+                        child:
+                            CircularProgressIndicator()); // Show loader while image is loading
+                  },
+                  errorBuilder: (context, error, stackTrace) {
+                    return const Center(
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Icon(Icons.broken_image, color: Colors.red, size: 40),
+                          SizedBox(height: 5),
+                          Text(
+                            "Failed to load image",
+                            style: TextStyle(color: Colors.red),
+                          ),
+                        ],
+                      ),
+                    ); // Show error if image fails
+                  },
                 ),
-              ); // Show error if image fails
-            },
-          ),
         ),
       ),
     );
@@ -183,30 +199,49 @@ class _FuelDetailsState extends State<FuelDetails> {
               InteractiveViewer(
                 minScale: 0.5,
                 maxScale: 3.0,
-                child: Image.network(
-                  image,
-                  errorBuilder: (context, error, stackTrace) {
-                    print("Error in full screen image: $error");
-                    return Container(
-                      color: Colors.black,
-                      child: const Center(
-                        child: Column(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Icon(Icons.broken_image,
-                                size: 100, color: Colors.white),
-                            SizedBox(height: 20),
-                            Text(
-                              "Failed to load image",
-                              style:
-                                  TextStyle(color: Colors.white, fontSize: 18),
-                            ),
-                          ],
+                child: image == "null"
+                    ? Container(
+                        color: Colors.black,
+                        child: const Center(
+                          child: Column(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Icon(Icons.broken_image,
+                                  size: 100, color: Colors.white),
+                              SizedBox(height: 20),
+                              Text(
+                                "No image found",
+                                style: TextStyle(
+                                    color: Colors.white, fontSize: 18),
+                              ),
+                            ],
+                          ),
                         ),
+                      )
+                    : Image.network(
+                        image,
+                        errorBuilder: (context, error, stackTrace) {
+                          print("Error in full screen image: $error");
+                          return Container(
+                            color: Colors.black,
+                            child: const Center(
+                              child: Column(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Icon(Icons.broken_image,
+                                      size: 100, color: Colors.white),
+                                  SizedBox(height: 20),
+                                  Text(
+                                    "Failed to load image",
+                                    style: TextStyle(
+                                        color: Colors.white, fontSize: 18),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          );
+                        },
                       ),
-                    );
-                  },
-                ),
               ),
               Positioned(
                 top: 20,

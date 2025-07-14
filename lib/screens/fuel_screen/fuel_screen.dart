@@ -33,6 +33,8 @@ class _FuelScreenState extends State<FuelScreen> {
     });
     try {
       List<FuelModel> data = await Auth.fuelList();
+      data = data.reversed.toList();
+
       setState(() {
         allFuelData = data;
         filteredFuelData = data; // Initially show all data

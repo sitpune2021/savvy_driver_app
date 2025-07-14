@@ -148,7 +148,7 @@ class _MaintenanceDetailsState extends State<MaintenanceDetails> {
               border: Border.all(color: Colors.blue),
               borderRadius: BorderRadius.circular(8),
             ),
-            child: widget.filepath.isNotEmpty
+            child: widget.filepath != "null"
                 ? Image.network(
                     widget.filepath,
                     fit: BoxFit.cover,
@@ -177,8 +177,7 @@ class _MaintenanceDetailsState extends State<MaintenanceDetails> {
                         color: Colors.red,
                         size: 40),
                   )
-                : const Icon(Icons.insert_drive_file,
-                    color: Colors.blue, size: 40),
+                : const Icon(Icons.broken_image, color: Colors.grey, size: 40),
           ),
         ),
       ],
@@ -198,30 +197,49 @@ class _MaintenanceDetailsState extends State<MaintenanceDetails> {
               InteractiveViewer(
                 minScale: 0.5,
                 maxScale: 3.0,
-                child: Image.network(
-                  image,
-                  errorBuilder: (context, error, stackTrace) {
-                    print("Error in full screen image: $error");
-                    return Container(
-                      color: Colors.black,
-                      child: const Center(
-                        child: Column(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Icon(Icons.broken_image,
-                                size: 100, color: Colors.white),
-                            SizedBox(height: 20),
-                            Text(
-                              "Failed to load image",
-                              style:
-                                  TextStyle(color: Colors.white, fontSize: 18),
-                            ),
-                          ],
+                child: image == "null"
+                    ? Container(
+                        color: Colors.black,
+                        child: const Center(
+                          child: Column(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Icon(Icons.broken_image,
+                                  size: 100, color: Colors.white),
+                              SizedBox(height: 20),
+                              Text(
+                                "No image found",
+                                style: TextStyle(
+                                    color: Colors.white, fontSize: 18),
+                              ),
+                            ],
+                          ),
                         ),
+                      )
+                    : Image.network(
+                        image,
+                        errorBuilder: (context, error, stackTrace) {
+                          print("Error in full screen image: $error");
+                          return Container(
+                            color: Colors.black,
+                            child: const Center(
+                              child: Column(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Icon(Icons.broken_image,
+                                      size: 100, color: Colors.white),
+                                  SizedBox(height: 20),
+                                  Text(
+                                    "Failed to load image",
+                                    style: TextStyle(
+                                        color: Colors.white, fontSize: 18),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          );
+                        },
                       ),
-                    );
-                  },
-                ),
               ),
               Positioned(
                 top: 20,

@@ -20,6 +20,7 @@ class _FuelFormState extends State<FuelForm> {
   File? meterPhoto;
   File? receiptPhoto;
   String? selectedDate2;
+  bool isSubmitting = false;
 
   final TextEditingController _vehicleNumberController =
       TextEditingController();
@@ -102,46 +103,44 @@ class _FuelFormState extends State<FuelForm> {
 
   void _submitForm() async {
     if (selectedDate == null ||
-            // _vehicleNumberController.text.isEmpty ||
-            _fuelAmountController.text.isEmpty ||
-            _priceController.text.isEmpty
-        // ||
-        // meterPhoto == null ||
-        // receiptPhoto == null
-        ) {
+        _fuelAmountController.text.isEmpty ||
+        _priceController.text.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
             content: Text('Please fill all fields and upload images')),
       );
       return;
-    } else {
-      bool result = await Auth.addFuel(
-          selectedDate2.toString(),
-          // _vehicleNumberController.text.trim(),
-          _priceController.text.trim(),
-          _fuelAmountController.text.trim(),
-          meterPhoto,
-          receiptPhoto);
-
-      if (result) {
-        _vehicleNumberController.clear();
-        _priceController.clear();
-        _fuelAmountController.clear();
-        // Add a delay of 1 second before navigating
-        Future.delayed(const Duration(milliseconds: 500), () {
-          Navigator.pop(context, true);
-        });
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Fueling Form Submitted Successfully')),
-        );
-      } else {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Server Error please try again later!')),
-        );
-      }
     }
 
-    // Handle form submission logic here
+    setState(() => isSubmitting = true); // Start loading
+
+    bool result = await Auth.addFuel(
+      selectedDate2.toString(),
+      _priceController.text.trim(),
+      _fuelAmountController.text.trim(),
+      meterPhoto,
+      receiptPhoto,
+    );
+
+    setState(() => isSubmitting = false); // Stop loading
+
+    if (result) {
+      _vehicleNumberController.clear();
+      _priceController.clear();
+      _fuelAmountController.clear();
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Fueling Form Submitted Successfully')),
+      );
+
+      Future.delayed(const Duration(milliseconds: 500), () {
+        Navigator.pop(context, true);
+      });
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Server Error please try again later!')),
+      );
+    }
   }
 
   @override
@@ -374,13 +373,20 @@ class _FuelFormState extends State<FuelForm> {
       width: double.infinity,
       height: 50,
       child: ElevatedButton(
-        onPressed: _submitForm,
+        onPressed: isSubmitting ? null : _submitForm, // Disable when submitting
         style: ElevatedButton.styleFrom(
           backgroundColor: Colors.blue,
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
         ),
-        child: const Text("Submit",
-            style: TextStyle(color: Colors.white, fontSize: 16)),
+        child: isSubmitting
+            ? const CircularProgressIndicator(
+                color: Colors.white,
+                strokeWidth: 2,
+              )
+            : const Text(
+                "Submit",
+                style: TextStyle(color: Colors.white, fontSize: 16),
+              ),
       ),
     );
   }

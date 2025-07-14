@@ -1,22 +1,19 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_staggered_animations/flutter_staggered_animations.dart';
 import 'package:intl/intl.dart';
-import 'package:page_transition/page_transition.dart';
 import 'package:savvy_aqua_delivery/model/order_model.dart';
 import 'package:savvy_aqua_delivery/screens/all_orders_map_screen/all_orders_map_screen.dart';
-import 'package:savvy_aqua_delivery/screens/order_screen/completed_order_details/completed_order_details.dart';
-import 'package:savvy_aqua_delivery/screens/track_order_screen/track_order.dart';
 import 'package:savvy_aqua_delivery/services/auth.dart';
-import 'package:shimmer/shimmer.dart';
 
-class CompletedOrders extends StatefulWidget {
-  const CompletedOrders({super.key});
+class InProgressOrders extends StatefulWidget {
+  const InProgressOrders({super.key});
 
   @override
-  State<CompletedOrders> createState() => _CompletedOrdersState();
+  State<InProgressOrders> createState() => _InProgressOrdersState();
 }
 
-class _CompletedOrdersState extends State<CompletedOrders> {
+class _InProgressOrdersState extends State<InProgressOrders> {
   bool isLoading = true;
   bool _isFetchingMore = false;
   bool _hasMore = true;
@@ -72,7 +69,7 @@ class _CompletedOrdersState extends State<CompletedOrders> {
     }
 
     final response =
-        await Auth.orderListPaginated("completed", page: _currentPage);
+        await Auth.orderListPaginated("in-progress", page: _currentPage);
 
     if (response != null) {
       setState(() {
@@ -120,24 +117,6 @@ class _CompletedOrdersState extends State<CompletedOrders> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.white,
-      floatingActionButton: FloatingActionButton(
-        tooltip: "Map",
-        backgroundColor: Colors.blue,
-        onPressed: () async {
-          bool? result = await Navigator.push(
-              context,
-              PageTransition(
-                  type: PageTransitionType.rightToLeft,
-                  duration: const Duration(milliseconds: 200),
-                  reverseDuration: const Duration(milliseconds: 200),
-                  child: const AllOrdersMapScreen()));
-
-          if (result == true) {
-            _refreshData();
-          }
-        },
-        child: const Icon(Icons.map_outlined, color: Colors.white),
-      ),
       body: RefreshIndicator(
         color: Colors.blue,
         backgroundColor: Colors.white,
@@ -199,22 +178,7 @@ class _CompletedOrdersState extends State<CompletedOrders> {
                                 child: SlideAnimation(
                                     verticalOffset: 50.0,
                                     child: FadeInAnimation(
-                                        child: GestureDetector(
-                                      onTap: () {
-                                        Navigator.push(
-                                            context,
-                                            PageTransition(
-                                                type: PageTransitionType
-                                                    .rightToLeft,
-                                                duration: const Duration(
-                                                    milliseconds: 200),
-                                                reverseDuration: const Duration(
-                                                    milliseconds: 200),
-                                                child:
-                                                    TrackOrder(order: order)));
-                                      },
-                                      child: OrderCard(order: order),
-                                    ))));
+                                        child: OrderCard(order: order))));
                           },
                         ),
             ),
@@ -300,7 +264,7 @@ class OrderCard extends StatelessWidget {
                     style: TextStyle(color: Colors.black54)),
                 Row(
                   children: [
-                    const Icon(Icons.circle, color: Colors.green, size: 12),
+                    const Icon(Icons.circle, color: Colors.orange, size: 12),
                     const SizedBox(width: 5),
                     Text(order.status,
                         style: const TextStyle(color: Colors.black)),

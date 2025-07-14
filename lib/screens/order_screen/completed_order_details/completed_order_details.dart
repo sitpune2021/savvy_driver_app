@@ -229,6 +229,7 @@ class _CompletedOrderDetailsState extends State<CompletedOrderDetails> {
 
   // Method to show image in full screen
   void _showFullImage(BuildContext context, String image) {
+    print("**********order confirmation image url $image");
     showDialog(
       context: context,
       builder: (BuildContext context) {
@@ -240,30 +241,49 @@ class _CompletedOrderDetailsState extends State<CompletedOrderDetails> {
               InteractiveViewer(
                 minScale: 0.5,
                 maxScale: 3.0,
-                child: Image.network(
-                  image,
-                  errorBuilder: (context, error, stackTrace) {
-                    print("Error in full screen image: $error");
-                    return Container(
-                      color: Colors.black,
-                      child: const Center(
-                        child: Column(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Icon(Icons.broken_image,
-                                size: 100, color: Colors.white),
-                            SizedBox(height: 20),
-                            Text(
-                              "Failed to load image",
-                              style:
-                                  TextStyle(color: Colors.white, fontSize: 18),
-                            ),
-                          ],
+                child: image == ""
+                    ? Container(
+                        color: Colors.black,
+                        child: const Center(
+                          child: Column(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Icon(Icons.broken_image,
+                                  size: 100, color: Colors.white),
+                              SizedBox(height: 20),
+                              Text(
+                                "No image found",
+                                style: TextStyle(
+                                    color: Colors.white, fontSize: 18),
+                              ),
+                            ],
+                          ),
                         ),
+                      )
+                    : Image.network(
+                        image,
+                        errorBuilder: (context, error, stackTrace) {
+                          print("Error in full screen image: $error");
+                          return Container(
+                            color: Colors.black,
+                            child: const Center(
+                              child: Column(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Icon(Icons.broken_image,
+                                      size: 100, color: Colors.white),
+                                  SizedBox(height: 20),
+                                  Text(
+                                    "Failed to load image",
+                                    style: TextStyle(
+                                        color: Colors.white, fontSize: 18),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          );
+                        },
                       ),
-                    );
-                  },
-                ),
               ),
               Positioned(
                 top: 20,

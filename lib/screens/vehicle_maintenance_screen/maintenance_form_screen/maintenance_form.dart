@@ -19,6 +19,7 @@ class _MaintenanceFormState extends State<MaintenanceForm> {
       TextEditingController();
   final TextEditingController _descriptionController = TextEditingController();
   final TextEditingController _totalAmountController = TextEditingController();
+  bool isSubmitting = false;
 
   File? _billImage;
   DateTime? selectedDate;
@@ -100,9 +101,10 @@ class _MaintenanceFormState extends State<MaintenanceForm> {
       );
       return;
     } else {
+      setState(() => isSubmitting = true);
       bool result = await Auth.addMaintenance(
           description, totalAmount, _billImage, selectedDate2!);
-
+      setState(() => isSubmitting = false);
       if (result) {
         _vehicleNumberController.clear();
         _maintenanceTypeController.clear();
@@ -225,17 +227,22 @@ class _MaintenanceFormState extends State<MaintenanceForm> {
             child: Padding(
               padding: const EdgeInsets.all(16),
               child: ElevatedButton(
-                onPressed: _submitForm,
+                onPressed: isSubmitting ? null : _submitForm,
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Colors.blue,
                   shape: const RoundedRectangleBorder(
                       borderRadius: BorderRadius.all(Radius.circular(8))),
                   minimumSize: const Size(double.infinity, 50),
                 ),
-                child: const Text(
-                  "Submit",
-                  style: TextStyle(color: Colors.white),
-                ),
+                child: isSubmitting
+                    ? const CircularProgressIndicator(
+                        color: Colors.white,
+                        strokeWidth: 2,
+                      )
+                    : const Text(
+                        "Submit",
+                        style: TextStyle(color: Colors.white, fontSize: 16),
+                      ),
               ),
             ),
           ),
