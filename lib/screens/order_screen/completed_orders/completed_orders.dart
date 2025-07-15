@@ -120,24 +120,6 @@ class _CompletedOrdersState extends State<CompletedOrders> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.white,
-      floatingActionButton: FloatingActionButton(
-        tooltip: "Map",
-        backgroundColor: Colors.blue,
-        onPressed: () async {
-          bool? result = await Navigator.push(
-              context,
-              PageTransition(
-                  type: PageTransitionType.rightToLeft,
-                  duration: const Duration(milliseconds: 200),
-                  reverseDuration: const Duration(milliseconds: 200),
-                  child: const AllOrdersMapScreen()));
-
-          if (result == true) {
-            _refreshData();
-          }
-        },
-        child: const Icon(Icons.map_outlined, color: Colors.white),
-      ),
       body: RefreshIndicator(
         color: Colors.blue,
         backgroundColor: Colors.white,
@@ -210,8 +192,9 @@ class _CompletedOrdersState extends State<CompletedOrders> {
                                                     milliseconds: 200),
                                                 reverseDuration: const Duration(
                                                     milliseconds: 200),
-                                                child:
-                                                    TrackOrder(order: order)));
+                                                child: CompletedOrderDetails(
+                                                    order: filteredOrderList[
+                                                        index])));
                                       },
                                       child: OrderCard(order: order),
                                     ))));
